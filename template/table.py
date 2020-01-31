@@ -14,6 +14,7 @@ class Record:
         self.key = key
         self.columns = columns
 
+
 class Table:
 
     """
