@@ -8,19 +8,18 @@ class Page:
         self.data = bytearray(4096)
 
     def has_capacity(self, columns):
-        if self.num_records+columns >= 512:
+        if self.num_records + columns >= 512:
             return False
         return True
 
-
     def write(self, value):
+        # print(value)
         value_list = self.convert_8byte(value)
+        # print(value_list)
         for i in range(len(value_list)):
             self.data[self.num_records * 8 + i] = value_list[i]
-            self.num_records += 1
-
-
-
+        # print(self.data[self.num_records*8:self.num_records*8+len(value_list)])
+        self.num_records += 1
 
     def convert_8byte(self, input):
         hex_list = []
