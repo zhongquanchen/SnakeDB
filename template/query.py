@@ -36,6 +36,10 @@ class Query:
 
         # (rid, key, columns, schema_encode, now, indirect, *datas)
         record = Record(rid, key, num_columns, schema_encoding, cur_time, indirect, list(columns[1:]))
+
+        # print(record.key)
+        # print(record.columns)
+
         self.table.write(record)
 
     """

@@ -38,10 +38,12 @@ class Table:
         pass
 
     def write(self, record):
+        # print(record.key)
+        # print(record.cur_time)
         page = self.load_page(record.columns)
         #  rid, key, columns, schema_encode, now, indirect, *datas):
-        page.write(record.rid)
         page.write(record.key)
+        page.write(record.rid)
         page.write(record.columns)
         page.write(record.schema)
         page.write(record.cur_time)
@@ -49,6 +51,8 @@ class Table:
 
         for i in range(len(record.data)):
             page.write(record.data[i])
+
+        print(page.data)
 
 
     def load_page(self, columns):

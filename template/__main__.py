@@ -16,6 +16,9 @@ for i in range(0, 10000):
     keys.append(906659671 + i)
 insert_time_1 = process_time()
 
+# page = query.table.page_directory[0]
+# print(page.data)
+
 print("Inserting 10k records took:  \t\t\t", insert_time_1 - insert_time_0)
 
 # Measuring update Performance
