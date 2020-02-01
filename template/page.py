@@ -7,8 +7,8 @@ class Page:
         self.num_records = 0
         self.data = bytearray(4096)
 
-    def has_capacity(self):
-        if self.num_records == 511:
+    def has_capacity(self, columns):
+        if self.num_records+columns >= 512:
             return False
         return True
 
@@ -16,7 +16,7 @@ class Page:
     def write(self, value):
         value_list = self.convert_8byte(value)
         for i in range(len(value_list)):
-            self.data[self.num_record * 8 + i] = value_list[i]
+            self.data[self.num_records * 8 + i] = value_list[i]
             self.num_records += 1
 
     def convert_8byte(self, input):
