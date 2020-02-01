@@ -17,7 +17,7 @@ class Page:
         value_list = self.convert_8byte(value)
         for i in range(len(value_list)):
             self.data[self.num_record * 8 + i] = value_list[i]
-        self.num_records += 1
+            self.num_records += 1
 
     def convert_8byte(self, input):
         hex_list = []
