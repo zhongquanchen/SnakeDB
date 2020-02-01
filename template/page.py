@@ -19,6 +19,11 @@ class Page:
             self.data[self.num_record * 8 + i] = value_list[i]
         self.num_records += 1
 
+    def remove(self, key):
+
+        for i in range(len(key)):
+            self.data[self.num_records]
+
     def convert_8byte(self, input):
         hex_list = []
         hex_input = list(str(input))

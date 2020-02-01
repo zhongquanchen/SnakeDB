@@ -17,6 +17,9 @@ class Query:
     """
 
     def delete(self, key):
+        self.key = key
+        record = Record(key)
+        self.table.remove(key)
 
     """
     # Insert a record with specified columns
