@@ -29,13 +29,17 @@ class Query:
     def insert(self, *columns):
         rid = 0
         key = columns[0]  # the first of the column is key from user input
-        schema_encoding = '0' * (self.table.num_columns+5)
-        num_columns = self.table.num_columns+4
-        cur_time = int(time.time()) # unable to store float, so convert to int type
+        schema_encoding = '0' * (self.table.num_columns + 5)
+        num_columns = self.table.num_columns + 4
+        cur_time = int(time.time())  # unable to store float, so convert to int type
         indirect = 0
 
         # (rid, key, columns, schema_encode, now, indirect, *datas)
         record = Record(rid, key, num_columns, schema_encoding, cur_time, indirect, list(columns[1:]))
+
+        # print(record.key)
+        # print(record.columns)
+
         self.table.write(record)
 
     """
