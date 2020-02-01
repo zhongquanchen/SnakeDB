@@ -16,8 +16,16 @@ for i in range(0, 10000):
     keys.append(906659671 + i)
 insert_time_1 = process_time()
 
-# page = query.table.page_directory[0]
-# print(page.data)
+page = query.table.page_directory[0]
+for i in range(512):
+    for j in range(8):
+        int_data = page.data[i*8+j]
+        if int_data < 10:
+            int_data = '0' + str(int_data)
+        print(int_data,end='')
+    print()
+print()
+print(page.data)
 
 print("Inserting 10k records took:  \t\t\t", insert_time_1 - insert_time_0)
 
