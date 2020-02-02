@@ -1,6 +1,6 @@
 from template.page import *
 from time import time
-
+from template.config import *
 
 class Record:
 
@@ -36,42 +36,41 @@ class Table:
     def __merge(self):
         pass
 
-    def write(self, record):
+    def write(self, record, location=DEFAULT_LOCATION, type=TYPE.BASE, modify_page=DEFAULT_PAGE):
+
+        page = self.load_page(record.columns, modify_page)
+        # updating dictionary on conditions
+        if TYPE.BASE == type:
+            self.rid_lookup.update({record.key: record.rid})
+            self.index_lookup.update({record.rid: page.num_records} )
 
         # update dict for matching key & rid
-        self.rid_lookup.update({record.key: record.rid})
-
-        page = self.load_page(record.columns)
-
-        #  rid, key, columns, schema_encode, now, indirect, *datas):
-        page.write(record.key)
-        page.write(record.rid)
-        page.write(record.columns)
-        page.write(record.schema)
-        page.write(record.cur_time)
-        page.write(record.indir_col)
-
+        page.write(record.key, location)
+        page.write(record.rid, location+1)
+        page.write(record.columns, location+2)
+        page.write(record.schema, location+3)
+        page.write(record.cur_time, location+4)
+        page.write(record.indir_col, location+5)
         for i in range(len(record.data)):
-            page.write(record.data[i])
+            page.write(record.data[i], location+6+i)
 
+    def load_page(self, columns, modify_page=DEFAULT_PAGE):
+        if DEFAULT_PAGE == modify_page:
+            # if the dictionary is empty just create one page
+            if len(self.page_directory) == 0:
+                page = Page()
+                self.page_directory.update({self.cur_page: page})
+                return self.page_directory[self.cur_page]
 
-        self.index_lookup.update({record.rid:self.index})
+            # if dict is not empty then check if the page is full
+            page = self.page_directory[self.cur_page]
+            if not page.has_capacity(columns):
+                self.cur_page += 1
+                page = Page()
+                self.page_directory.update({self.cur_page: page})
+                return self.page_directory[self.cur_page]
 
-
-    def load_page(self, columns):
-        # if the dictionary is empty just create one page
-        if len(self.page_directory) == 0:
-            page = Page()
-            self.page_directory.update({self.cur_page: page})
-            return self.page_directory[self.cur_page]
-
-        # if dict is not empty then check if the page is full
-        page = self.page_directory[self.cur_page]
-        if not page.has_capacity(columns):
-            self.cur_page += 1
-            page = Page()
-            self.page_directory.update({self.cur_page: page})
-            return self.page_directory[self.cur_page]
-
-        # otherwise return this page
-        return page
+            # otherwise return this page
+            return page
+        else :
+            return self.page_directory[modify_page]

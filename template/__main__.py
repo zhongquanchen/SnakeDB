@@ -87,13 +87,9 @@ for i in range(0, 10000):
 insert_time_1 = process_time()
 print("Inserting 10k records took:  \t\t\t", insert_time_1 - insert_time_0)
 
-record = query.select_bytearray(906659671)
+print()
+query.update(906659672, 906659671,12,13,14)
+record = query.select(906659672, [])
+record1 = query.translate_data(record)
 
-for i in range(len(record)):
-    print(record[i], end=" ")
-
-query.update(906659671, [11,12,13,14])
-
-# query.delete(906659671)
-# delete_time_1 = process_time()
-# print("Deleting 10k records took: \t\t\t", delete_time_1 - delete_time_0)
+print(record1)
