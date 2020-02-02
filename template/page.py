@@ -6,6 +6,7 @@ class Page:
     def __init__(self):
         self.num_records = 0
         self.data = bytearray(4096)
+        self.index_lookup = {}
 
     def has_capacity(self, columns):
         if self.num_records + columns >= 512:
@@ -15,10 +16,12 @@ class Page:
     def write(self, value):
         # print(value)
         value_list = self.convert_8byte(value)
-        # print(value_list)
+
+
         for i in range(len(value_list)):
             self.data[self.num_records * 8 + i] = value_list[i]
-        # print(self.data[self.num_records*8:self.num_records*8+len(value_list)])
+
+
         self.num_records += 1
 
     def convert_8byte(self, input):

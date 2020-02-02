@@ -27,11 +27,13 @@ class Query:
     """
 
     def insert(self, *columns):
-        rid = 0
         key = columns[0]  # the first of the column is key from user input
-        schema_encoding = '0' * (self.table.num_columns + 5)
-        num_columns = self.table.num_columns + 4
-        cur_time = int(time.time())  # unable to store float, so convert to int type
+
+        rid = key % 906659671
+        schema_encoding = '0' * (self.table.num_columns+5)
+        num_columns = self.table.num_columns+4
+        cur_time = int(time.time()) # unable to store float, so convert to int type
+
         indirect = 0
 
         # (rid, key, columns, schema_encode, now, indirect, *datas)
@@ -47,14 +49,42 @@ class Query:
     """
 
     def select(self, key, query_columns):
-        pass
+        page_data = self.select(key)
+        return page_data
+    # FIXME: NEED TO FILTER OUT THE QUERY_COL
+
+    def select_bytearray(self, key):
+        rid = self.table.rid_lookup[key]
+        page_num = int(rid / NUM_PAGE_RECORDS)
+        page = self.table.page_directory[page_num]
+
+        record_index = self.table.index_lookup[rid]
+        page_data = page.data[record_index*9:record_index*9+72]
+        return page_data
+
 
     """
     # Update a record with specified key and columns
     """
 
     def update(self, key, *columns):
-        pass
+
+        record = self.select_bytearray(key)
+
+
+        self.insert(*columns)
+
+
+    def get_8byte_data(self, data):
+        ret_str = ''
+        for i in range(len(data)):
+            temp_str = str(data[i])
+            if data[i] < 10:
+                ret_str += '0' + temp_str
+            else :
+                ret_str += temp_str
+
+
     """
     :param start_range: int         # Start of the key range to aggregate 
     :param end_range: int           # End of the key range to aggregate 
