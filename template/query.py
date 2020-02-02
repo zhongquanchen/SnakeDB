@@ -27,8 +27,8 @@ class Query:
     """
 
     def insert(self, *columns):
-        rid = 0
         key = columns[0]  # the first of the column is key from user input
+        rid = key % 906659671
         schema_encoding = '0' * (self.table.num_columns+5)
         num_columns = self.table.num_columns+4
         cur_time = int(time.time()) # unable to store float, so convert to int type
@@ -47,7 +47,17 @@ class Query:
     """
 
     def select(self, key, query_columns):
-        pass
+        rid = self.table.rid_lookup[key]
+        page_num = int(rid / NUM_PAGE_RECORDS)
+        # print(key, end=' ')
+        # print(rid, end=' ')
+        # print(page_num)
+        page = self.table.page_directory[page_num]
+
+        record_index = self.table.index_lookup[rid]
+        page_data = page.data[record_index*9:record_index*9+72]
+        return page_data
+
 
     """
     # Update a record with specified key and columns
@@ -55,6 +65,7 @@ class Query:
 
     def update(self, key, *columns):
         pass
+
 
     """
     :param start_range: int         # Start of the key range to aggregate 

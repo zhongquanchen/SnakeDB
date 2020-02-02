@@ -16,16 +16,15 @@ for i in range(0, 10000):
     keys.append(906659671 + i)
 insert_time_1 = process_time()
 
-page = query.table.page_directory[0]
-for i in range(512):
-    for j in range(8):
-        int_data = page.data[i*8+j]
-        if int_data < 10:
-            int_data = '0' + str(int_data)
-        print(int_data,end='')
-    print()
-print()
-print(page.data)
+# page = query.table.page_directory[0]
+# for i in range(512):
+#     for j in range(8):
+#         int_data = page.data[i*8+j]
+#         if int_data < 10:
+#             int_data = '0' + str(int_data)
+#         print(int_data,end='')
+#     print()
+# print()
 
 print("Inserting 10k records took:  \t\t\t", insert_time_1 - insert_time_0)
 
@@ -44,10 +43,16 @@ for i in range(0, 10000):
 update_time_1 = process_time()
 print("Updating 10k records took:  \t\t\t", update_time_1 - update_time_0)
 
+# print(query.table.page_directory)
+# print(query.table.page_directory[196].data)
 # Measuring Select Performance
 select_time_0 = process_time()
 for i in range(0, 10000):
-    query.select(choice(keys), [1, 1, 1, 1, 1])
+    data = query.select(choice(keys), [1, 1, 1, 1, 1])
+    for i in range(len(data)):
+        print(data[i], end='')
+    print()
+    print()
 select_time_1 = process_time()
 print("Selecting 10k records took:  \t\t\t", select_time_1 - select_time_0)
 
