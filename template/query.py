@@ -47,11 +47,13 @@ class Query:
     """
 
     def select(self, key, query_columns):
+        page_data = self.select(key)
+        return page_data
+    # FIXME: NEED TO FILTER OUT THE QUERY_COL
+
+    def select_bytearray(self, key):
         rid = self.table.rid_lookup[key]
         page_num = int(rid / NUM_PAGE_RECORDS)
-        # print(key, end=' ')
-        # print(rid, end=' ')
-        # print(page_num)
         page = self.table.page_directory[page_num]
 
         record_index = self.table.index_lookup[rid]
@@ -64,8 +66,20 @@ class Query:
     """
 
     def update(self, key, *columns):
-        pass
+        record = self.select_bytearray(key)
 
+
+        self.insert(*columns)
+
+
+    def get_8byte_data(self, data):
+        ret_str = ''
+        for i in range(len(data)):
+            temp_str = str(data[i])
+            if data[i] < 10:
+                ret_str += '0' + temp_str
+            else :
+                ret_str += temp_str
 
     """
     :param start_range: int         # Start of the key range to aggregate 
