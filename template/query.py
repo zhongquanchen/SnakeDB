@@ -20,10 +20,9 @@ class Query:
     """
 
     def delete(self, key, *columns):
-        data = self.select(key)
-        rid = self.table.rid_lookup[key]
-        for key in self.table:
-            if key in columns:
+        print(self.key)
+        for rid in self.table:
+            if rid in columns:
                 try:
                     del rid
                 except KeyError:
@@ -50,8 +49,8 @@ class Query:
         # (rid, key, columns, schema_encode, now, indirect, *datas)
         record = Record(rid, key, num_columns, schema_encoding, cur_time, indirect, list(columns[1:]))
 
-        # print(record.key)
-        # print(record.columns)
+        #print(record.key)
+        #print(record.columns)
 
         self.table.write(record)
 

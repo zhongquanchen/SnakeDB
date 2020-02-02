@@ -16,15 +16,11 @@ class Page:
     def write(self, value):
         # print(value)
         value_list = self.convert_8byte(value)
-
-
         for i in range(len(value_list)):
             self.data[self.num_records * 8 + i] = value_list[i]
-
-
         self.num_records += 1
 
-    def convert_8byte(self, input):
+    def convert_8byte(input):
         hex_list = []
         hex_input = list(str(input))
         if len(hex_input) % 2 != 0:
