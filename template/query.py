@@ -19,8 +19,19 @@ class Query:
     # Read a record with specified RID
     """
 
-    def delete(self, key):
-        pass
+    def delete(self, key, *columns):
+        data = self.select(key)
+        rid = self.table.rid_lookup[key]
+        for key in self.table:
+            if key in columns:
+                try:
+                    del rid
+                except KeyError:
+                    print("Key is not Found")
+            else:
+                print("Key is not found, try again")
+
+
 
     """
     # Insert a record with specified columns
@@ -72,7 +83,7 @@ class Query:
         record = self.select_bytearray(key)
 
 
-        self.insert(*columns)
+        #self.insert(*columns)
 
 
     def get_8byte_data(self, data):
