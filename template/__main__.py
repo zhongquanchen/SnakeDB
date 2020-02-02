@@ -80,12 +80,12 @@ keys = []
 # Initialize delete time
 delete_time_0 = process_time()
 # Measuring Insert Performance
-#insert_time_0 = process_time()
+insert_time_0 = process_time()
 for i in range(0, 10000):
     query.insert(906659671 + i, 93, 0, 0, 0)
     keys.append(906659671 + i)
-#insert_time_1 = process_time()
-#print("Inserting 10k records took:  \t\t\t", insert_time_1 - insert_time_0)
+insert_time_1 = process_time()
+print("Inserting 10k records took:  \t\t\t", insert_time_1 - insert_time_0)
 
 record = query.select_bytearray(906659671)
 
@@ -94,6 +94,6 @@ for i in range(len(record)):
 
 query.update(906659671, [11,12,13,14])
 
-query.delete(906659671)
-delete_time_1 = process_time()
-print("Deleting 10k records took: \t\t\t", delete_time_1 - delete_time_0)
+# query.delete(906659671)
+# delete_time_1 = process_time()
+# print("Deleting 10k records took: \t\t\t", delete_time_1 - delete_time_0)
