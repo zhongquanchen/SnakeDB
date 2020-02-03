@@ -7,44 +7,33 @@ from template.config import *
 
 
 class Query:
-    """
-    # Creates a Query object that can perform different queries on the specified table 
-    """
-
+    """ Creates a Query object that can perform different queries on the specified table """
     def __init__(self, table):
         self.table = table
         self.num_col = 0
         pass
 
-    """
-    # internal Method
-    # Read a record with specified RID
-    """
-
+    """ Delete the key in the dictionary, throw an exception when user want to update the deleted record """
     def delete(self, key):
-        # delete data with key
+        # delete data with key in base page
         if key in self.table.base_rid_lookup:
             try:
                 del self.table.base_rid_lookup[key]
             except KeyError:
                 print("Key is not Found")
+        # delete data with key in tail page
         if key in self.table.tail_rid_lookup:
             try:
                 del self.table.tail_rid_lookup[key]
             except KeyError:
                 print("Key is not Found")
 
-
-    """
-    # Insert a record with specified columns
-    """
-
+    """ Insert a record with specified columns """
     def insert(self, *columns):
         key = columns[0]  # the first of the column is key from user input
         if key in self.table.base_rid_lookup:
             print("key existed in db")
             return
-
         rid = key % 906659671
         schema_encoding = '0' * self.table.num_columns
         cur_time = int(time.time())  # unable to store float, so convert to int type
@@ -53,10 +42,7 @@ class Query:
         self.table.write(record)
         self.num_col += 1
 
-    """
-    # Read a record with specified key
-    """
-
+    """ Select a record with specified columns"""
     def select(self, key, query_columns):
         if key not in self.table.base_rid_lookup:
             print("can't find key")
@@ -64,23 +50,16 @@ class Query:
         page_data = self.select_bytearray(key)
         newest_data = self.check_for_update(page_data)
         temp_list = translate_data(newest_data)
-
-
         list_for_user = []
         list_for_user.append(temp_list[0])
         for i in range(self.table.num_columns-1):
             list_for_user.append(temp_list[6+i])
-        # def __init__(self, key, rid, columns, *data):
-
         record = Record_For_User(temp_list[0], temp_list[1], list_for_user)
-
         other_list = []
         other_list.append(record)
         return other_list
 
-    # FIXME: NEED TO FILTER OUT THE QUERY_COL
-
-    def select_bytearray(self, key):
+    def select_bytearray(self, key):  # Select the page data
         rid = self.table.base_rid_lookup[key]
         index = self.table.base_index_lookup[rid]
         page = self.table.page_directory[index.page_number]
@@ -99,26 +78,17 @@ class Query:
         else:
             return page_data
 
-
-
-    """
-    # Update a record with specified key and columns
-    """
-
+    """ Update a record with specified key and columns """
     def update(self, key, *columns):
-        # look up the data location
-        rid = self.table.base_rid_lookup[key]
+        rid = self.table.base_rid_lookup[key]  # look up the data location
         index = self.table.base_index_lookup[rid]
         page = self.table.page_directory[index.page_number]
         page_data = page.data[index.start_index: index.end_index]
-
-        # translate data from bytearray
-        data = translate_data(page_data)
+        data = translate_data(page_data)  # translate data from bytearray
         new_rid = data[1] * 10 + 1
         new_scheme = self.modify_schema(list(columns))
         modify_record = Record(columns[0], new_rid, data[2], new_scheme, data[4], data[5], list(columns[1:]))
-        # modify data with key
-        self.table.modify(modify_record, index)
+        self.table.modify(modify_record, index)  # modify data with key
 
     def modify_schema(self, columns):
         schema = ''
@@ -136,16 +106,12 @@ class Query:
     :param end_range: int           # End of the key range to aggregate 
     :param aggregate_columns: int  # Index of desired column to aggregate
     """
-
     def sum(self, start_range, end_range, aggregate_column_index):
         num_record_in_page = self.table.page_directory[0].num_records / (self.table.num_columns + INTER_DATA_COL)
-        # find two key
-        keys_col = self.find_keys(start_range, end_range)
+        keys_col = self.find_keys(start_range, end_range)  # find two key
         sum = 0
-        print("aggregate_column_index ", aggregate_column_index)
         sorted_keys = sorted(self.table.base_rid_lookup.items(), key=operator.itemgetter(0))
         on_add = False
-
         for i in range(end_range - start_range+1):
             if start_range + i in self.table.base_rid_lookup:
                 data = self.select(start_range + i, [1,1,1,1,1])[0]
