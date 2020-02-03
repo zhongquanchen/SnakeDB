@@ -63,20 +63,15 @@ class Query:
         page_data = self.select_bytearray(key)
         newest_data = self.check_for_update(page_data)
         temp_list = translate_data(newest_data)
+
+
         list_for_user = []
         list_for_user.append(temp_list[0])
         for i in range(self.table.num_columns-1):
             list_for_user.append(temp_list[i+INTER_DATA_COL+1])
         return list_for_user
 
-    def select_for_admin(self, key, query_columns):
-        if key not in self.table.base_rid_lookup:
-            print("can't find key")
-            exit()
-        page_data = self.select_bytearray(key)
-        newest_data = self.check_for_update(page_data)
-        temp_list = translate_data(newest_data)
-        return temp_list
+    # FIXME: NEED TO FILTER OUT THE QUERY_COL
 
     def select_bytearray(self, key):
         rid = self.table.base_rid_lookup[key]
@@ -108,7 +103,7 @@ class Query:
         rid = self.table.base_rid_lookup[key]
         index = self.table.base_index_lookup[rid]
         page = self.table.page_directory[index.page_number]
-        page_data = page.data[index.start_index: index.end_index+DATA_SIZE]
+        page_data = page.data[index.start_index: index.end_index]
 
         # translate data from bytearray
         data = translate_data(page_data)
@@ -143,37 +138,20 @@ class Query:
         if start_range > end_range:
             from_num = end_range
             to_num = start_range
-        else :
+        else:
             from_num = start_range
             to_num = end_range
 
         sum = 0
-        for i in range(to_num-from_num):
-            index = self.table.base_index_lookup[from_num+i]
+        for i in range(to_num - from_num):
+            index = self.table.base_index_lookup[from_num + i]
             page = self.table.page_directory[index.page_number]
             data = page.data[index.start_index:index.end_index + DATA_SIZE]
             latest_data = self.check_for_update(data)
             trans_data_list = translate_data(latest_data)
             if 0 == aggregate_column_index:
                 sum += trans_data_list[0]
-            else :
-                sum += trans_data_list[INTER_DATA_COL+aggregate_column_index]
+            else:
+                sum += trans_data_list[INTER_DATA_COL + aggregate_column_index]
 
         return sum
-
-
-    def find_page_dir(self, from_num, to_num, num_record_in_page):
-        pages_index = []
-        print("number of record in a page ", num_record_in_page)
-
-        contain_page_num = 0
-        # search for the base page range
-        for i in range(TAIL_PAGE_NUM):
-            if i in self.table.page_directory:
-                if from_num < i * 51 < to_num:
-                    pages_index.append(i)
-                elif i * 51 > to_num:
-                    break
-        # return pages within range of index
-        return pages_index
-
