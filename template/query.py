@@ -20,8 +20,24 @@ class Query:
     # Read a record with specified RID
     """
 
-    def delete(self, key):
-        pass
+    def delete(self, key, columns):
+        # look up the data location
+        rid = self.table.base_rid_lookup[key]
+        index = self.table.base_index_lookup[rid]
+        page = self.table.page_directory[index.page_number]
+        page_data = page.data[index.start_index: index.end_index]
+
+        # delete data with key
+        for i in range(len(columns)):
+            if columns[i] is not None:
+                if 'key' in columns:
+                    try:
+                        del rid
+                    except KeyError:
+                        print("Key is not Found")
+                else:
+                    print("Key is not found, try again")
+
 
     """
     # Insert a record with specified columns
