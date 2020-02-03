@@ -65,11 +65,11 @@ class Query:
         temp_list = translate_data(newest_data)
 
 
-        list_for_user = []
-        list_for_user.append(temp_list[0])
-        for i in range(self.table.num_columns-1):
-            list_for_user.append(temp_list[i+INTER_DATA_COL+1])
-        return list_for_user
+        # list_for_user = []
+        # list_for_user.append(temp_list[0])
+        # for i in range(self.table.num_columns-1):
+        #     list_for_user.append(temp_list[i+INTER_DATA_COL+1])
+        return temp_list
 
     # FIXME: NEED TO FILTER OUT THE QUERY_COL
 
@@ -132,4 +132,32 @@ class Query:
     """
 
     def sum(self, start_range, end_range, aggregate_column_index):
-        pass
+        from_num = 0
+        to_num = 0
+        if start_range > end_range:
+            from_num = end_range
+            to_num = start_range
+        else :
+            from_num = start_range
+            to_num = end_range
+
+        pages = self.find_page_dir(from_num, to_num)
+
+
+
+    def find_page_dir(self, from_num, to_num):
+        pages = []
+        num_record_in_page = self.table.page_directory[0].page_num / (self.table.num_columns + INTER_DATA_COL)
+        print("number of record in a page ", num_record_in_page)
+
+        contain_page_num = 0
+        # search for the base page range
+        for i in range(TAIL_PAGE_NUM):
+            if i in self.table.page_directory:
+                if from_num < i * 51 < to_num:
+                    pages.append(self.table.page_directory[i])
+                elif i * 51 > to_num:
+                    break
+        # return pages within range of index
+        return pages
+
