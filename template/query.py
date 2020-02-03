@@ -12,6 +12,7 @@ class Query:
 
     def __init__(self, table):
         self.table = table
+        self.num_col = 0
         pass
 
     """
@@ -36,18 +37,19 @@ class Query:
     # Insert a record with specified columns
     """
 
-    def insert(self, *columns, type=TYPE.BASE):
-        if type == TYPE.BASE:
-            key = columns[0]  # the first of the column is key from user input
-            rid = key % 906659671
-            schema_encoding = '0' * (self.table.num_columns+5)
-            num_columns = self.table.num_columns+4
-            cur_time = int(time.time()) # unable to store float, so convert to int type
-            indirect = 0
-            record = Record(rid, key, num_columns, schema_encoding, cur_time, indirect, list(columns[1:]))
-            self.table.write(record)
+    def insert(self, *columns):
+        key = columns[0]  # the first of the column is key from user input
+        if key in self.table.base_rid_lookup:
+            print("key existed in db")
+            return
 
-
+        rid = key % 906659671
+        schema_encoding = '0' * self.table.num_columns
+        cur_time = int(time.time())  # unable to store float, so convert to int type
+        indirect = 0
+        record = Record(key, rid, indirect, schema_encoding, cur_time, self.num_col, list(columns[1:]))
+        self.table.write(record)
+        self.num_col += 1
 
     """
     # Read a record with specified key
@@ -55,16 +57,37 @@ class Query:
 
     def select(self, key, query_columns):
         page_data = self.select_bytearray(key)
-        return page_data
+        newest_data = self.check_for_update(page_data)
+        temp_list = translate_data(newest_data)
+
+
+        list_for_user = []
+        list_for_user.append(temp_list[0])
+        for i in range(self.table.num_columns-1):
+            list_for_user.append(temp_list[i+INTER_DATA_COL+1])
+        return list_for_user
+
     # FIXME: NEED TO FILTER OUT THE QUERY_COL
 
     def select_bytearray(self, key):
-        rid = self.table.rid_lookup[key]
-        page_num = int(rid / NUM_PAGE_RECORDS)
-        page = self.table.page_directory[page_num]
-        record_index = self.table.index_lookup[rid]
-        page_data = page.data[record_index*9:record_index*9+72]
+        rid = self.table.base_rid_lookup[key]
+        index = self.table.base_index_lookup[rid]
+        page = self.table.page_directory[index.page_number]
+        page_data = page.data[index.start_index: index.end_index]
         return page_data
+
+    def check_for_update(self, page_data):
+        list_data = translate_data(page_data)
+        if list_data[2] != 0:
+            index = self.table.tail_index_lookup[list_data[2]]
+            if list_data[2] not in self.table.tail_index_lookup:
+                print("can't find rid in tail page : def check_for_update()")
+            tail_page = self.table.page_directory[index.page_number]
+            tail_page_data = tail_page.data[index.start_index: index.end_index+DATA_SIZE]
+            return tail_page_data
+        else:
+            return page_data
+
 
 
     """
@@ -73,54 +96,30 @@ class Query:
 
     def update(self, key, *columns):
         # look up the data location
-        rid = self.table.rid_lookup[key]
-        page_num = int(rid / NUM_PAGE_RECORDS)
-        page = self.table.page_directory[page_num]
-        record_index = self.table.index_lookup[rid]
-        record = page.data[record_index*9:record_index*9+72]
+        rid = self.table.base_rid_lookup[key]
+        index = self.table.base_index_lookup[rid]
+        page = self.table.page_directory[index.page_number]
+        page_data = page.data[index.start_index: index.end_index]
 
         # translate data from bytearray
-        data = self.translate_data(record)
-
-        modify_record = Record(data[1], data[0], data[2], data[3], data[4], data[5], list(columns[1:]))
+        data = translate_data(page_data)
+        new_rid = data[1] * 10 + 1
+        new_scheme = self.modify_schema(list(columns))
+        modify_record = Record(columns[0], new_rid, data[2], new_scheme, data[4], data[5], list(columns[1:]))
         # modify data with key
-        # write(self, record, location=0, type=TYPE.BASE, modify_page=DEFAULT_PAGE):
-        self.table.write(modify_record,record_index, TYPE.TAIL, page_num)
-        # print(record_index)
+        self.table.modify(modify_record, index)
 
 
-
-    def translate_data(self, data):
-        ret_list = []
-        for i in range(9):
-            record_str = ''
-            for j in range(8):
-                temp_str = str(data[i*8+j])
-                if data[i*8+j] < 10:
-                    record_str += '0' + temp_str
-                elif 255 == data[i*8+j]:
-                    break
-                else:
-                    record_str += temp_str
-            ret_list.append(int(record_str))
-        return ret_list
+    def modify_schema(self, columns):
+        schema = ''
+        for i in range(len(columns)):
+            if columns[i] is None:
+                schema += '0'
+            else:
+                schema += '1'
+        return schema
 
 
-        # ret_list = []
-        # ret_str = ''
-        # for i in range(NUM_PAGE_RECORDS):
-        #     temp_str = ''
-        #     for j in range(8):
-        #         temp_str = str(data[i*9+j])
-        #         if data[i] < 10:
-        #             ret_str += '0' + temp_str
-        #         elif data[i] == 255:
-        #             ret_list.append(temp_str)
-        #             break
-        #         else:
-        #             ret_str += temp_str
-        #     ret_list.append(ret_str)
-        # return ret_list
 
 
     """

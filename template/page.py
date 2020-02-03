@@ -4,27 +4,29 @@ from template.config import *
 class Page:
 
     def __init__(self):
-        self.location = 0
+        self.physical_addr = 0
         self.num_records = 0
         self.data = bytearray(4096)
-        self.index_lookup = {}
 
     def has_capacity(self, columns):
         if self.num_records + columns >= 512:
             return False
         return True
 
-    def write(self, value, location):
+    def write(self, value):
+        num_addr = self.num_records * 8
         str_val = str(value)
-        if location >= DEFAULT_LOCATION:
-            value_list = self.convert_8byte(str_val)
-            for i in range(len(value_list)):
-                self.data[self.num_records * 8 + i] = value_list[i]
-            self.num_records += 1
-        else : # when it needs to modify the old data
-            value_list = self.convert_8byte(str_val)
-            for i in range(len(value_list)):
-                self.data[location * 8 + i] = value_list[i]
+        value_list = self.convert_8byte(str_val)
+        for i in range(len(value_list)):
+            self.data[num_addr + i] = value_list[i]
+        self.num_records += 1
+        self.physical_addr = self.num_records * 8
+
+    def modify(self, index, indir):
+        str_val = str(indir)
+        value_list = self.convert_8byte(str_val)
+        for i in range(len(value_list)):
+            self.data[index.start_index+INDIRECTION_INDEX+i] = value_list[i]
 
     def convert_8byte(input):
         hex_list = []
@@ -32,7 +34,7 @@ class Page:
         if len(hex_input) % 2 != 0:
             hex_input.insert(0, '0')
 
-        if len(hex_input) / 2 > 8:
+        if len(hex_input) / 2 > 7:
             print("value exceed 8bytes")
             return
 
