@@ -20,23 +20,18 @@ class Query:
     # Read a record with specified RID
     """
 
-    def delete(self, key, columns):
-        # look up the data location
-        rid = self.table.base_rid_lookup[key]
-        index = self.table.base_index_lookup[rid]
-        page = self.table.page_directory[index.page_number]
-        page_data = page.data[index.start_index: index.end_index]
-
+    def delete(self, key):
         # delete data with key
-        for i in range(len(columns)):
-            if columns[i] is not None:
-                if 'key' in columns:
-                    try:
-                        del rid
-                    except KeyError:
-                        print("Key is not Found")
-                else:
-                    print("Key is not found, try again")
+        if key in self.table.base_rid_lookup:
+            try:
+                del self.table.base_rid_lookup[key]
+            except KeyError:
+                print("Key is not Found")
+        if key in self.table.tail_rid_lookup:
+            try:
+                del self.table.tail_rid_lookup[key]
+            except KeyError:
+                print("Key is not Found")
 
 
     """
@@ -62,6 +57,9 @@ class Query:
     """
 
     def select(self, key, query_columns):
+        if key not in self.table.base_rid_lookup:
+            print("can't find key")
+            exit()
         page_data = self.select_bytearray(key)
         newest_data = self.check_for_update(page_data)
         temp_list = translate_data(newest_data)

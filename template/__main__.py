@@ -111,5 +111,6 @@ cols = [1,10,1000,10000,100000]
 query.update(906667265, cols[0],cols[1],cols[2],cols[3],cols[4])
 print(query.select(906667265, [1, 1, 1, 1, 1]))
 
-query.delete(906667256)
-print(query.select(906667265))
+query.delete(906667265)
+query.insert(906667265, 93, 0, 0, 0)
+print(query.select(906667265, [1, 1, 1, 1, 1]))
