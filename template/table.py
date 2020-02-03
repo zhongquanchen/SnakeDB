@@ -41,6 +41,7 @@ class Table:
         self.num_columns = num_columns
 
         self.page_directory = {}
+        self.col_to_key = {}
         self.base_rid_lookup = {}
         self.base_index_lookup = {}
 
@@ -69,14 +70,18 @@ class Table:
         if TYPE.BASE == modify_page:
             self.base_rid_lookup.update({record.record['key']: record.record['rid']})
             self.base_index_lookup.update({record.record['rid']: Index(self.base_page, start_index, end_index)})
+            self.col_to_key.update({record.record['columns']:record.record['key']})
         else:
             self.tail_rid_lookup.update({record.record['key']: record.record['rid']})
             self.tail_index_lookup.update({record.record['rid']: Index(self.tail_page, start_index, end_index)})
 
 
     def modify(self, record, index):
+        # load base page data & check for the base page to see any update
         load_base_page = self.page_directory[index.page_number]
-        data = translate_data(load_base_page.data[index.start_index:index.end_index+DATA_SIZE])
+        data = self.check_for_update(load_base_page.data[index.start_index:index.end_index+DATA_SIZE])
+
+        # translate data
         old_record = Record(data[0], data[1], data[2], data[3], data[4], data[5], data[6:])
         new_record = self.update_with_schema(record, old_record)
 
@@ -90,6 +95,18 @@ class Table:
         # change indirection for old data
         indirection = tail_rid
         load_base_page.modify(index, indirection)
+
+    def check_for_update(self, page_data):
+        list_data = translate_data(page_data)
+        if list_data[2] != 0:
+            index = self.tail_index_lookup[list_data[2]]
+            if list_data[2] not in self.tail_index_lookup:
+                print("can't find rid in tail page : def check_for_update()")
+            tail_page = self.page_directory[index.page_number]
+            tail_page_data = translate_data(tail_page.data[index.start_index: index.end_index+DATA_SIZE])
+            return tail_page_data
+        else:
+            return list_data
 
     def update_with_schema(self, record, old_record):
         ret_record = record
@@ -150,3 +167,5 @@ class Table:
                 return self.page_directory[self.tail_page]
             # otherwise return this page
             return page
+
+
