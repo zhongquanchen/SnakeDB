@@ -15,17 +15,6 @@ from random import choice, randrange
 #     query.insert(906659671 + i, 93, 0, 0, 0)
 #     keys.append(906659671 + i)
 # insert_time_1 = process_time()
-#
-# # page = query.table.page_directory[0]
-# # for i in range(512):
-# #     for j in range(8):
-# #         int_data = page.data[i*8+j]
-# #         if int_data < 10:
-# #             int_data = '0' + str(int_data)
-# #         print(int_data,end='')
-# #     print()
-# # print()
-#
 # print("Inserting 10k records took:  \t\t\t", insert_time_1 - insert_time_0)
 #
 # # Measuring update Performance
@@ -84,9 +73,40 @@ for i in range(0, 10000):
 insert_time_1 = process_time()
 print("Inserting 10k records took:  \t\t\t", insert_time_1 - insert_time_0)
 
-print()
-query.update(906659672, 906659671,12,13,14)
-record = query.select(906659672, [])
-record1 = query.translate_data(record)
+page = query.table.page_directory[0]
 
-print(record1)
+# Measuring Select Performance
+select_time_0 = process_time()
+for i in range(0, 10000):
+    data = query.select(choice(keys), [1, 1, 1, 1, 1])
+    print(data)
+select_time_1 = process_time()
+print("Selecting 10k records took:  \t\t\t", select_time_1 - select_time_0)
+
+# Measuring update Performance
+update_cols = [
+    [randrange(0, 100), None, None, None, None],
+    [None, randrange(0, 100), None, None, None],
+    [None, None, randrange(0, 100), None, None],
+    [None, None, None, randrange(0, 100), None],
+    [None, None, None, None, randrange(0, 100)],
+]
+
+update = 0
+update_time_0 = process_time()
+for i in range(0, 10000):
+    update = choice(keys)
+    columns = choice(update_cols)
+    print("update cols ", columns, "update key ", update)
+    query.update(update, columns[0],columns[1],columns[2],columns[3],columns[4])
+    print(query.select(update, [1, 1, 1, 1, 1]))
+    print()
+update_time_1 = process_time()
+print("Updating 10k records took:  \t\t\t", update_time_1 - update_time_0)
+
+print()
+print()
+print()
+cols = [1,10,1000,10000,100000]
+query.update(906667265, cols[0],cols[1],cols[2],cols[3],cols[4])
+print(query.select(906667265, [1, 1, 1, 1, 1]))
