@@ -19,7 +19,11 @@ class Record:
         self.record.update({'indirect': indirect})
         self.record.update({'data': datas})
 
-
+class Record_For_User:
+    def __init__(self, key, rid, columns):
+        self.rid = rid
+        self.key = key
+        self.columns = columns
 
 class Table:
     """

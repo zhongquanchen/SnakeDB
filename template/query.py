@@ -1,5 +1,5 @@
 from template import table
-from template.table import Table, Record
+from template.table import Table, Record, Record_For_User
 from template.index import Index
 from template.page import *
 from template.config import *
@@ -68,8 +68,18 @@ class Query:
         list_for_user = []
         list_for_user.append(temp_list[0])
         for i in range(self.table.num_columns-1):
-            list_for_user.append(temp_list[i+INTER_DATA_COL+1])
-        return list_for_user
+            list_for_user.append(temp_list[6+i])
+        # def __init__(self, key, rid, columns, *data):
+
+        record = Record_For_User(temp_list[0], temp_list[1], list_for_user)
+        print(record.columns)
+
+        other_list = []
+        other_list.append(record)
+
+
+
+        return other_list
 
     # FIXME: NEED TO FILTER OUT THE QUERY_COL
 
