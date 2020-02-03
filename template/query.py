@@ -142,9 +142,7 @@ class Query:
         # find two key
         keys_col = self.find_keys(start_range, end_range)
         sum = 0
-        print("aggregate_column_index ", aggregate_column_index)
         sorted_keys = sorted(self.table.base_rid_lookup.items(), key=operator.itemgetter(0))
-        on_add = False
 
         for i in range(end_range - start_range+1):
             if start_range + i in self.table.base_rid_lookup:
