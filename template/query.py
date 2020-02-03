@@ -132,4 +132,26 @@ class Query:
     """
 
     def sum(self, start_range, end_range, aggregate_column_index):
-        pass
+        num_record_in_page = self.table.page_directory[0].num_records / (self.table.num_columns + INTER_DATA_COL)
+        from_num = 0
+        to_num = 0
+        if start_range > end_range:
+            from_num = end_range
+            to_num = start_range
+        else:
+            from_num = start_range
+            to_num = end_range
+
+        sum = 0
+        for i in range(to_num - from_num):
+            index = self.table.base_index_lookup[from_num + i]
+            page = self.table.page_directory[index.page_number]
+            data = page.data[index.start_index:index.end_index + DATA_SIZE]
+            latest_data = self.check_for_update(data)
+            trans_data_list = translate_data(latest_data)
+            if 0 == aggregate_column_index:
+                sum += trans_data_list[0]
+            else:
+                sum += trans_data_list[INTER_DATA_COL + aggregate_column_index]
+
+        return sum
