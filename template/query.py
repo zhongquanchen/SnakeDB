@@ -20,18 +20,8 @@ class Query:
     # Read a record with specified RID
     """
 
-    def delete(self, key, *columns):
-        print(self.key)
-        for rid in self.table:
-            if rid in columns:
-                try:
-                    del rid
-                except KeyError:
-                    print("Key is not Found")
-            else:
-                print("Key is not found, try again")
-
-
+    def delete(self, key):
+        pass
 
     """
     # Insert a record with specified columns
@@ -118,7 +108,6 @@ class Query:
             else:
                 schema += '1'
         return schema
-
 
 
 

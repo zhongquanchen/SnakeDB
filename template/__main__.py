@@ -34,7 +34,6 @@ from random import choice, randrange
 #
 # # print(query.table.page_directory)
 # # print(query.table.page_directory[196].data)
-#
 # # Measuring Select Performance
 # select_time_0 = process_time()
 # for i in range(0, 10000):
@@ -66,8 +65,6 @@ grades_table = db.create_table('Grades', 5, 0)
 query = Query(grades_table)
 keys = []
 
-# Initialize delete time
-delete_time_0 = process_time()
 # Measuring Insert Performance
 insert_time_0 = process_time()
 for i in range(0, 10000):
@@ -101,8 +98,7 @@ for i in range(0, 10000):
     update = choice(keys)
     columns = choice(update_cols)
     print("update cols ", columns, "update key ", update)
-    query.update(update, columns[0], columns[1],
-                 columns[2], columns[3], columns[4])
+    query.update(update, columns[0],columns[1],columns[2],columns[3],columns[4])
     print(query.select(update, [1, 1, 1, 1, 1]))
     print()
 update_time_1 = process_time()
@@ -111,6 +107,6 @@ print("Updating 10k records took:  \t\t\t", update_time_1 - update_time_0)
 print()
 print()
 print()
-cols = [1, 10, 1000, 10000, 100000]
-query.update(906667265, cols[0], cols[1], cols[2], cols[3], cols[4])
+cols = [1,10,1000,10000,100000]
+query.update(906667265, cols[0],cols[1],cols[2],cols[3],cols[4])
 print(query.select(906667265, [1, 1, 1, 1, 1]))

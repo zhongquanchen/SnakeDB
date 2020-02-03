@@ -28,7 +28,7 @@ class Page:
         for i in range(len(value_list)):
             self.data[index.start_index+INDIRECTION_INDEX+i] = value_list[i]
 
-    def convert_8byte(input):
+    def convert_8byte(self, input):
         hex_list = []
         hex_input = list(input)
         if len(hex_input) % 2 != 0:
