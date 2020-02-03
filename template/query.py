@@ -1,3 +1,4 @@
+import operator
 from template import table
 from template.table import Table, Record, Record_For_User
 from template.index import Index
@@ -72,13 +73,9 @@ class Query:
         # def __init__(self, key, rid, columns, *data):
 
         record = Record_For_User(temp_list[0], temp_list[1], list_for_user)
-        print(record.columns)
 
         other_list = []
         other_list.append(record)
-
-
-
         return other_list
 
     # FIXME: NEED TO FILTER OUT THE QUERY_COL
@@ -123,7 +120,6 @@ class Query:
         # modify data with key
         self.table.modify(modify_record, index)
 
-
     def modify_schema(self, columns):
         schema = ''
         for i in range(len(columns)):
@@ -143,25 +139,29 @@ class Query:
 
     def sum(self, start_range, end_range, aggregate_column_index):
         num_record_in_page = self.table.page_directory[0].num_records / (self.table.num_columns + INTER_DATA_COL)
-        from_num = 0
-        to_num = 0
-        if start_range > end_range:
-            from_num = end_range
-            to_num = start_range
-        else:
-            from_num = start_range
-            to_num = end_range
-
+        # find two key
+        keys_col = self.find_keys(start_range, end_range)
         sum = 0
-        for i in range(to_num - from_num):
-            index = self.table.base_index_lookup[from_num + i]
-            page = self.table.page_directory[index.page_number]
-            data = page.data[index.start_index:index.end_index + DATA_SIZE]
-            latest_data = self.check_for_update(data)
-            trans_data_list = translate_data(latest_data)
-            if 0 == aggregate_column_index:
-                sum += trans_data_list[0]
-            else:
-                sum += trans_data_list[INTER_DATA_COL + aggregate_column_index]
+        print("aggregate_column_index ", aggregate_column_index)
+        sorted_keys = sorted(self.table.base_rid_lookup.items(), key=operator.itemgetter(0))
+        on_add = False
 
+        for i in range(end_range - start_range+1):
+            if start_range + i in self.table.base_rid_lookup:
+                data = self.select(start_range + i, [1,1,1,1,1])[0]
+                sum += data.columns[aggregate_column_index]
         return sum
+
+    def find_keys(self, start_range, end_range):
+        a = 0
+        b = 0
+        for key, value in self.table.col_to_key.items():
+            if value == start_range:
+                a = key
+            if value == end_range:
+                b = key
+        return [a, b]
+
+
+
+
