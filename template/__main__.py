@@ -45,7 +45,7 @@ from random import choice, randrange
 # select_time_1 = process_time()
 # print("Selecting 10k records took:  \t\t\t", select_time_1 - select_time_0)
 #
-# # Measuring Aggregate Performance
+# Measuring Aggregate Performance
 # agg_time_0 = process_time()
 # for i in range(0, 10000, 100):
 #     result = query.sum(i, 100, randrange(0, 5))
@@ -110,3 +110,5 @@ print()
 cols = [1,10,1000,10000,100000]
 query.update(906667265, cols[0],cols[1],cols[2],cols[3],cols[4])
 print(query.select(906667265, [1, 1, 1, 1, 1]))
+page = query.table.page_directory[0]
+print(page.num_records)
