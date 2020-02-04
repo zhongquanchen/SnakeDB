@@ -17,6 +17,7 @@ class Query:
     """ Delete the key in the dictionary, throw an exception when user want to update the deleted record """
 
     def delete(self, key):
+
         # delete data with key in base page
         if key in self.table.base_rid_lookup:
             try:
@@ -29,7 +30,7 @@ class Query:
                 del self.table.tail_rid_lookup[key]
             except KeyError:
                 print("Key is not Found")
-
+        return self.table.col_to_key
     """ Insert a record with specified columns """
 
     def insert(self, *columns):
