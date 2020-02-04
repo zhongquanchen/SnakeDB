@@ -9,11 +9,13 @@ class Page:
         self.physical_addr = 0
         self.num_records = 0
         self.data = bytearray(4096)
+
     """define the capacity of the page"""
     def has_capacity(self, columns):
         if self.num_records + columns >= 512:  # the capcity cannot exceed 512
             return False
         return True
+
     """define write function to write value into the page"""
     def write(self, value):
         num_addr = self.num_records * 8
@@ -23,12 +25,14 @@ class Page:
             self.data[num_addr + i] = value_list[i]
         self.num_records += 1
         self.physical_addr = self.num_records * 8
+
     """define modify function in order to implement update query later"""
     def modify(self, index, indir):
         str_val = str(indir)
         value_list = self.convert_8byte(str_val)
         for i in range(len(value_list)):
             self.data[index.start_index+INDIRECTION_INDEX+i] = value_list[i]
+
     """Write 8 bytes into the page at a time"""
     def convert_8byte(self, input):
         hex_list = []

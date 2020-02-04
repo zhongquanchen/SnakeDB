@@ -17,20 +17,20 @@ class Query:
     """ Delete the key in the dictionary, throw an exception when user want to update the deleted record """
 
     def delete(self, key):
-
         # delete data with key in base page
         if key in self.table.base_rid_lookup:
             try:
                 del self.table.base_rid_lookup[key]
             except KeyError:
                 print("Key is not Found")
+
         # delete data with key in tail page
         if key in self.table.tail_rid_lookup:
             try:
                 del self.table.tail_rid_lookup[key]
             except KeyError:
                 print("Key is not Found")
-        return self.table.col_to_key
+
     """ Insert a record with specified columns """
 
     def insert(self, *columns):
@@ -38,11 +38,15 @@ class Query:
         if key in self.table.base_rid_lookup:
             print("key existed in db")
             return
+
         rid = key % 906659671
         schema_encoding = '0' * self.table.num_columns
+
         # unable to store float, so convert to int type
         cur_time = int(time.time())
         indirect = 0
+
+        # put data into record, and store into table
         record = Record(key, rid, indirect, schema_encoding,
                         cur_time, self.num_col, list(columns[1:]))
         self.table.write(record)
@@ -51,9 +55,12 @@ class Query:
     """ Select a record with specified columns"""
 
     def select(self, key, query_columns):
+        # check if key exist in table
         if key not in self.table.base_rid_lookup:
             print("can't find key")
             exit()
+
+        # convert the type from the table to user interactable
         page_data = self.select_bytearray(key)
         newest_data = self.check_for_update(page_data)
         temp_list = translate_data(newest_data)
@@ -88,11 +95,14 @@ class Query:
     """ Update a record with specified key and columns """
 
     def update(self, key, *columns):
+        # find the old data in the table
         rid = self.table.base_rid_lookup[key]  # look up the data location
         index = self.table.base_index_lookup[rid]
         page = self.table.page_directory[index.page_number]
         page_data = page.data[index.start_index: index.end_index]
         data = translate_data(page_data)  # translate data from bytearray
+
+        # modify the new record and put them into table
         new_rid = data[1] * 10 + 1
         new_scheme = self.modify_schema(list(columns))
         modify_record = Record(
@@ -115,6 +125,8 @@ class Query:
     """
 
     def sum(self, start_range, end_range, aggregate_column_index):
+        # sort the key in dictionary
+        # sum them up by two range
         num_record_in_page = self.table.page_directory[0].num_records / (
             self.table.num_columns + INTER_DATA_COL)
         keys_col = self.find_keys(start_range, end_range)  # find two key
