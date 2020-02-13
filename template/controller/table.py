@@ -1,7 +1,7 @@
-from template.page import *
+from template.model.page import *
 from time import time
-from template.config import *
-from template.index import *
+from template.tools.config import *
+from template.model.index import *
 
 """
     :Record is used as a format to write into the page, [this is for admin use]
@@ -135,10 +135,10 @@ class Table:
     def update_with_schema(self, record, old_record):
         ret_record = record
         for key, value in ret_record.record.items():
-            if key is 'data':
+            if key == 'data':
                 ret_data = self.update_data(record, old_record)
                 ret_record.record.update({key: ret_data})
-            if key is 'key':
+            if key == 'key':
                 if ret_record.record[key] is not None:
                     ret_record.record.update({key: ret_record.record[key]})
                 else:

@@ -1,4 +1,4 @@
-from template.config import *
+from template.tools.config import *
 """
 Implementation of Page for our SnakeSQL
 """

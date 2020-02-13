@@ -1,9 +1,8 @@
 import operator
-from template import table
-from template.table import Table, Record, Record_For_User
-from template.index import Index
-from template.page import *
-from template.config import *
+from template.controller.table import *
+from template.model.index import Index
+from template.model.page import *
+from template.tools.config import *
 
 
 class Query:
