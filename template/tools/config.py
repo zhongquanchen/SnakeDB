@@ -19,9 +19,12 @@ class TYPE(enum.Enum):
     BASE = 0
     TAIL = 1
 
+
 """
     translate_data function used to translate a data from page to a readable data for user
 """
+
+
 def translate_data(data):
     ret_list = []
     for i in range(10):
