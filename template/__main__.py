@@ -55,9 +55,3 @@ for i in range(0, 10000):
 delete_time_1 = process_time()
 print("Deleting 10k records took:  \t\t\t", delete_time_1 - delete_time_0)
 
-
-print(query.delete(906659672))
-print(query.delete(906659673))
-print(query.select(906659672, [1, 1, 1, 1, 1]))
-print(query.select(906659673, [1, 1, 1, 1, 1]))
-print(query.select(906659674, [1, 1, 1, 1, 1]))

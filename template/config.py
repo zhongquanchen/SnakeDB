@@ -17,8 +17,6 @@ class TYPE(enum.Enum):
     BASE = 0
     TAIL = 1
 
-# def init(data):
-#
 
 
 def translate_data(data):

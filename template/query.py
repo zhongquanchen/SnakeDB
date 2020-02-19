@@ -17,7 +17,6 @@ class Query:
     """ Delete the key in the dictionary, throw an exception when user want to update the deleted record """
 
     def delete(self, key):
-
         # delete data with key in base page
         if key in self.table.base_rid_lookup:
             try:
@@ -30,23 +29,30 @@ class Query:
                 del self.table.tail_rid_lookup[key]
             except KeyError:
                 print("Key is not Found")
-        return self.table.col_to_key
+        return self.table.key
+
     """ Insert a record with specified columns """
 
     def insert(self, *columns):
-        key = columns[0]  # the first of the column is key from user input
-        if key in self.table.base_rid_lookup:
-            print("key existed in db")
-            return
+        # key = columns[0]  # the first of the column is key from user input
+        # if key in self.table.base_rid_lookup:
+        #     print("key existed in db")
+        #     return
+        # rid = key % 906659671
+        # schema_encoding = '0' * self.table.num_columns
+        # # unable to store float, so convert to int type
+        # cur_time = int(time.time())
+        # indirect = 0
+        # record = Record(key, rid, indirect, schema_encoding,
+        #                 cur_time, self.num_col, list(columns[1:]))
+        # self.table.write(record)
+        # self.num_col += 1
+        key = columns[0]
+        rid = randomGenerator[key]
+        
+    def randomGenerator(self, key):
         rid = key % 906659671
-        schema_encoding = '0' * self.table.num_columns
-        # unable to store float, so convert to int type
-        cur_time = int(time.time())
-        indirect = 0
-        record = Record(key, rid, indirect, schema_encoding,
-                        cur_time, self.num_col, list(columns[1:]))
-        self.table.write(record)
-        self.num_col += 1
+        rid += CURRENT
 
     """ Select a record with specified columns"""
 
