@@ -1,19 +1,20 @@
 import operator
-from template import table
-from template.table import Table, Record, Record_For_User
-from template.index import Index
-from template.page import *
-from template.config import *
+from template.controller.table import *
+from template.model.index import Index
+from template.model.page import *
+from template.tools.config import *
 
 
 class Query:
     """ Creates a Query object that can perform different queries on the specified table """
+
     def __init__(self, table):
         self.table = table
         self.num_col = 0
         pass
 
     """ Delete the key in the dictionary, throw an exception when user want to update the deleted record """
+
     def delete(self, key):
         # delete data with key in base page
         if key in self.table.base_rid_lookup:
@@ -21,6 +22,7 @@ class Query:
                 del self.table.base_rid_lookup[key]
             except KeyError:
                 print("Key is not Found")
+
         # delete data with key in tail page
         if key in self.table.tail_rid_lookup:
             try:
@@ -29,24 +31,35 @@ class Query:
                 print("Key is not Found")
 
     """ Insert a record with specified columns """
+
     def insert(self, *columns):
         key = columns[0]  # the first of the column is key from user input
         if key in self.table.base_rid_lookup:
             print("key existed in db")
             return
+
         rid = key % 906659671
         schema_encoding = '0' * self.table.num_columns
-        cur_time = int(time.time())  # unable to store float, so convert to int type
+
+        # unable to store float, so convert to int type
+        cur_time = int(time.time())
         indirect = 0
-        record = Record(key, rid, indirect, schema_encoding, cur_time, self.num_col, list(columns[1:]))
+
+        # put data into record, and store into table
+        record = Record(key, rid, indirect, schema_encoding,
+                        cur_time, self.num_col, list(columns[1:]))
         self.table.write(record)
         self.num_col += 1
 
     """ Select a record with specified columns"""
+
     def select(self, key, query_columns):
+        # check if key exist in table
         if key not in self.table.base_rid_lookup:
             print("can't find key")
             exit()
+
+        # convert the type from the table to user interactable
         page_data = self.select_bytearray(key)
         newest_data = self.check_for_update(page_data)
         temp_list = translate_data(newest_data)
@@ -79,15 +92,20 @@ class Query:
             return page_data
 
     """ Update a record with specified key and columns """
+
     def update(self, key, *columns):
+        # find the old data in the table
         rid = self.table.base_rid_lookup[key]  # look up the data location
         index = self.table.base_index_lookup[rid]
         page = self.table.page_directory[index.page_number]
         page_data = page.data[index.start_index: index.end_index]
         data = translate_data(page_data)  # translate data from bytearray
+
+        # modify the new record and put them into table
         new_rid = data[1] * 10 + 1
         new_scheme = self.modify_schema(list(columns))
-        modify_record = Record(columns[0], new_rid, data[2], new_scheme, data[4], data[5], list(columns[1:]))
+        modify_record = Record(
+            columns[0], new_rid, data[2], new_scheme, data[4], data[5], list(columns[1:]))
         self.table.modify(modify_record, index)  # modify data with key
 
     def modify_schema(self, columns):
@@ -99,22 +117,25 @@ class Query:
                 schema += '1'
         return schema
 
-
-
     """
     :param start_range: int         # Start of the key range to aggregate 
     :param end_range: int           # End of the key range to aggregate 
     :param aggregate_columns: int  # Index of desired column to aggregate
     """
+
     def sum(self, start_range, end_range, aggregate_column_index):
-        num_record_in_page = self.table.page_directory[0].num_records / (self.table.num_columns + INTER_DATA_COL)
+        # sort the key in dictionary
+        # sum them up by two range
+        num_record_in_page = self.table.page_directory[0].num_records / (
+            self.table.num_columns + INTER_DATA_COL)
         keys_col = self.find_keys(start_range, end_range)  # find two key
         sum = 0
-        sorted_keys = sorted(self.table.base_rid_lookup.items(), key=operator.itemgetter(0))
+        sorted_keys = sorted(
+            self.table.base_rid_lookup.items(), key=operator.itemgetter(0))
         on_add = False
         for i in range(end_range - start_range+1):
             if start_range + i in self.table.base_rid_lookup:
-                data = self.select(start_range + i, [1,1,1,1,1])[0]
+                data = self.select(start_range + i, [1, 1, 1, 1, 1])[0]
                 sum += data.columns[aggregate_column_index]
         return sum
 
@@ -127,7 +148,3 @@ class Query:
             if value == end_range:
                 b = key
         return [a, b]
-
-
-
-

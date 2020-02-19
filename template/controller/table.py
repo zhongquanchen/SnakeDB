@@ -1,11 +1,12 @@
-from template.page import *
+from template.model.page import *
 from time import time
-from template.config import *
-from template.index import *
+from template.tools.config import *
+from template.model.index import *
 
-
+"""
+    :Record is used as a format to write into the page, [this is for admin use]
+"""
 class Record:
-
     def __init__(self, key, rid, indirect, schema_encode, now, columns, datas):
         self.record = {}
         self.create_record(rid, key, columns, schema_encode, now, indirect, datas)
@@ -19,19 +20,24 @@ class Record:
         self.record.update({'indirect': indirect})
         self.record.update({'data': datas})
 
+"""
+    :Record is used as a format to write into the page, [this is for user] *block some data that shouldn't be seem
+"""
 class Record_For_User:
     def __init__(self, key, rid, columns):
         self.rid = rid
         self.key = key
         self.columns = columns
 
+"""
+    :Table will used to store page directories, and all the ids, rid, columns, etc.
+"""
 class Table:
     """
     :param name: string         #Table name
     :param num_columns: int     #Number of Columns: all columns are integer
     :param key: int             #Index of table key in columns
     """
-
     def __init__(self, name, num_columns, key):
         self.base_page = BASE_PAGE_NUM
         self.tail_page = TAIL_PAGE_NUM
@@ -53,6 +59,11 @@ class Table:
     def __merge(self):
         pass
 
+    """
+    :param name: record. contain the data for each rows
+    :param name: modify_page. detect the action is to write in base page or in tail page
+                              by default the action is writing in base page
+    """
     def write(self, record, modify_page=TYPE.BASE):
         page = self.load_page(self.num_columns + INTER_DATA_COL, modify_page)
 
@@ -75,7 +86,10 @@ class Table:
             self.tail_rid_lookup.update({record.record['key']: record.record['rid']})
             self.tail_index_lookup.update({record.record['rid']: Index(self.tail_page, start_index, end_index)})
 
-
+    """
+    :param name: record. contain the data for each rows
+    :param name: index. (actually location in the bytearray) used to write into the page
+    """
     def modify(self, record, index):
         # load base page data & check for the base page to see any update
         load_base_page = self.page_directory[index.page_number]
@@ -96,6 +110,11 @@ class Table:
         indirection = tail_rid
         load_base_page.modify(index, indirection)
 
+    """
+        This function will check for the row of data to see 
+        if the indirection of that data is point to other location
+        :param name: page_data. a row of data, [namely: record]
+    """
     def check_for_update(self, page_data):
         list_data = translate_data(page_data)
         if list_data[2] != 0:
@@ -108,13 +127,18 @@ class Table:
         else:
             return list_data
 
+    """
+        This function will be called by function[ modify(self, record, index) ]
+        is used to update the schema of a record to check which data needs update in row
+        :param name : record, old_record -- namely, new record and old record
+    """
     def update_with_schema(self, record, old_record):
         ret_record = record
         for key, value in ret_record.record.items():
-            if key is 'data':
+            if key == 'data':
                 ret_data = self.update_data(record, old_record)
                 ret_record.record.update({key: ret_data})
-            if key is 'key':
+            if key == 'key':
                 if ret_record.record[key] is not None:
                     ret_record.record.update({key: ret_record.record[key]})
                 else:
@@ -132,7 +156,10 @@ class Table:
                 ret_data.append(update_data[i])
         return ret_data
 
-
+    """
+        This function will be called by function[ write() ]
+        Is used to load a actual page for write function
+    """
     def load_page(self, columns, modify_page=TYPE.BASE):
         if TYPE.BASE == modify_page:
             # if the dictionary is empty just create one page

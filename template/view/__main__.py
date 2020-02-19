@@ -1,9 +1,9 @@
-from template.db import Database
-from template.query import Query
+from template.controller.db import Database
+from template.controller.query import Query
 from time import process_time
 from random import choice, randrange
 
-# # Student Id and 4 grades
+# Student Id and 4 grades
 db = Database()
 grades_table = db.create_table('Grades', 5, 0)
 query = Query(grades_table)
@@ -32,8 +32,6 @@ for i in range(0, 10000):
 update_time_1 = process_time()
 print("Updating 10k records took:  \t\t\t", update_time_1 - update_time_0)
 
-# print(query.table.page_directory)
-# print(query.table.page_directory[196].data)
 # Measuring Select Performance
 select_time_0 = process_time()
 for i in range(0, 10000):
