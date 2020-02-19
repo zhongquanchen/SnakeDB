@@ -135,47 +135,6 @@ class Table:
             return self.page_directory[self.tail_page]
 
     """
-        This function will be called by function[ write() ]
-        Is used to load a actual page for write function
-    """
-    def load_page(self, columns, modify_page=TYPE.BASE):
-        if TYPE.BASE == modify_page:
-            # if the dictionary is empty just create one page
-            if len(self.page_directory) == 0:
-                page = Page()
-                self.page_directory.update({self.base_page: page})
-                return self.page_directory[self.base_page]
-
-            # if dict is not empty then check if the page is full
-            page = self.page_directory[self.base_page]
-            if not page.has_capacity(columns):
-                self.base_page += 1
-                page = Page()
-                self.page_directory.update({self.base_page: page})
-                return self.page_directory[self.base_page]
-
-            # otherwise return this page
-            return page
-        else:
-            # if the dictionary is empty just create one page
-            if TAIL_PAGE_NUM not in self.page_directory:
-                page = Page()
-                self.page_directory.update({self.tail_page: page})
-                return self.page_directory[self.tail_page]
-
-            # if dict is not empty then check if the page is full
-            page = self.page_directory[self.tail_page]
-            if not page.has_capacity(columns):
-                self.tail_page += 1
-                page = Page()
-                self.page_directory.update({self.tail_page: page})
-                return self.page_directory[self.tail_page]
-            # otherwise return this page
-            return page
-
-
-
-    """
     :param name: record. contain the data for each rows
     :param name: index. (actually location in the bytearray) used to write into the page
     """
@@ -201,34 +160,5 @@ class Table:
             return tail_page_data
         else:
             return list_data
-
-    """
-        This function will be called by function[ modify(self, record, index) ]
-        is used to update the schema of a record to check which data needs update in row
-        :param name : record, old_record -- namely, new record and old record
-    """
-    def update_with_schema(self, record, old_record):
-        ret_record = record
-        for key, value in ret_record.record.items():
-            if key == 'data':
-                ret_data = self.update_data(record, old_record)
-                ret_record.record.update({key: ret_data})
-            if key == 'key':
-                if ret_record.record[key] is not None:
-                    ret_record.record.update({key: ret_record.record[key]})
-                else:
-                    ret_record.record.update({key: old_record.record[key]})
-        return ret_record
-
-    def update_data(self, record, old_record):
-        update_data = record.record['data']
-        old_data = old_record.record['data']
-        ret_data = []
-        for i in range(len(update_data)):
-            if update_data[i] is None:
-                ret_data.append(old_data[i])
-            else:
-                ret_data.append(update_data[i])
-        return ret_data
 
 

@@ -18,11 +18,6 @@ class Page:
         return ret_data
 
     """define the capacity of the page"""
-    def has_capacity(self, columns):
-        if self.num_records + columns >= 512:  # the capcity cannot exceed 512
-            return False
-        return True
-
     def has_capacity(self):
         if self.num_records + 1 >= 512:
             return False
