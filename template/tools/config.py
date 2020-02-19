@@ -12,6 +12,8 @@ BASE_PAGE_NUM = 0
 TAIL_PAGE_NUM = 1000
 INDIRECTION_INDEX = 16
 
+TOTAL_RID = 100000000
+CURRENT_RID = 1
 
 class TYPE(enum.Enum):
     BASE = 0
@@ -34,3 +36,5 @@ def translate_data(data):
                 record_str += temp_str
         ret_list.append(int(record_str))
     return ret_list
+
+

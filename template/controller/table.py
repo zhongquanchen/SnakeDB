@@ -12,13 +12,13 @@ class Record:
         self.create_record(rid, key, columns, schema_encode, now, indirect, datas)
 
     def create_record(self, rid, key, columns, schema_encode, now, indirect, datas):
-        self.record.update({'key': key})
-        self.record.update({'rid': rid})
-        self.record.update({'columns': columns})
-        self.record.update({'schema': schema_encode})
-        self.record.update({'time': now})
-        self.record.update({'indirect': indirect})
-        self.record.update({'data': datas})
+        self.key = key
+        self.rid = rid
+        self.columns = columns
+        self.schema = schema_encode
+        self.time = now
+        self.indirect = indirect
+        self.datas = datas
 
 """
     :Record is used as a format to write into the page, [this is for user] *block some data that shouldn't be seem
@@ -54,6 +54,12 @@ class Table:
         self.tail_rid_lookup = {}
         self.tail_index_lookup = {}
 
+        # use to match key with rid
+        self.key_to_rid = {}
+        # use to match the rid and the index, data location
+        self.rid_to_index = {}
+        # current page index
+        self.current_page = 0
         pass
 
     def __merge(self):
@@ -65,50 +71,119 @@ class Table:
                               by default the action is writing in base page
     """
     def write(self, record, modify_page=TYPE.BASE):
-        page = self.load_page(self.num_columns + INTER_DATA_COL, modify_page)
+        record_array = self.record_to_array(record)
+        # update key in database & look_for_page will check for the pages directory and update if needed
+        pages = self.look_for_pages(modify_page)
+        start_index = pages[0].physical_addr
+        for i in range(len(pages)):
+            pages[i].write(record_array[i])
+        end_index = pages[0].physical_addr
 
-        start_index = page.physical_addr
-        page.write(record.record['key'])
-        page.write(record.record['rid'])
-        page.write(record.record['indirect'])
-        page.write(record.record['schema'])
-        page.write(record.record['time'])
-        page.write(record.record['columns'])
-        for i in range(len(record.record['data'])):
-            page.write(record.record['data'][i])
-        end_index = page.physical_addr
+        if modify_page == TYPE.BASE:
+            self.key_to_rid.update({record.key: record.rid})
+            self.rid_to_index.update({record.rid: Index(self.current_page, start_index, end_index)})
+        else :
+            self.tail_rid_lookup.update({record.key: record.rid})
+            self.tail_index_lookup.update({record.rid: Index(self.tail_page, start_index, end_index)})
 
+
+    """
+        format of array 
+        # self.key = key
+        # self.rid = rid
+        # self.columns = columns
+        # self.schema = schema_encode
+        # self.time = now
+        # self.indirect = indirect
+        # self.datas = datas
+    """
+    def record_to_array(self, record):
+        record_array = []
+        record_array.append(record.key)
+        record_array.append(record.rid)
+        record_array.append(record.columns)
+        record_array.append(record.schema)
+        record_array.append(record.time)
+        record_array.append(record.indirect)
+        for i in range(len(record.datas)):
+            record_array.append(record.datas[i])
+        return record_array
+
+    def look_for_pages(self, modify_page=TYPE.BASE):
         if TYPE.BASE == modify_page:
-            self.base_rid_lookup.update({record.record['key']: record.record['rid']})
-            self.base_index_lookup.update({record.record['rid']: Index(self.base_page, start_index, end_index)})
-            self.col_to_key.update({record.record['columns']:record.record['key']})
+            if len(self.page_directory) != 0:
+                pages = self.page_directory[self.current_page]
+            if len(self.page_directory) == 0 or pages[0].has_capacity() == False:
+                pages = []
+                for i in range(self.num_columns + INTER_DATA_COL):
+                    page = Page()
+                    pages.append(page)
+                self.current_page += 1
+                self.page_directory.update({self.current_page: pages})
+            return self.page_directory[self.current_page]
         else:
-            self.tail_rid_lookup.update({record.record['key']: record.record['rid']})
-            self.tail_index_lookup.update({record.record['rid']: Index(self.tail_page, start_index, end_index)})
+            # if the dictionary is empty just create one page
+            if self.tail_page in self.page_directory:
+                pages = self.page_directory[self.tail_page]
+            if self.tail_page not in self.page_directory or pages[0].has_capacity() == False:
+                pages = []
+                for i in range(self.num_columns + INTER_DATA_COL):
+                    page = Page()
+                    pages.append(page)
+                self.tail_page += 1
+                self.page_directory.update({self.tail_page: pages})
+            return self.page_directory[self.tail_page]
+
+    """
+        This function will be called by function[ write() ]
+        Is used to load a actual page for write function
+    """
+    def load_page(self, columns, modify_page=TYPE.BASE):
+        if TYPE.BASE == modify_page:
+            # if the dictionary is empty just create one page
+            if len(self.page_directory) == 0:
+                page = Page()
+                self.page_directory.update({self.base_page: page})
+                return self.page_directory[self.base_page]
+
+            # if dict is not empty then check if the page is full
+            page = self.page_directory[self.base_page]
+            if not page.has_capacity(columns):
+                self.base_page += 1
+                page = Page()
+                self.page_directory.update({self.base_page: page})
+                return self.page_directory[self.base_page]
+
+            # otherwise return this page
+            return page
+        else:
+            # if the dictionary is empty just create one page
+            if TAIL_PAGE_NUM not in self.page_directory:
+                page = Page()
+                self.page_directory.update({self.tail_page: page})
+                return self.page_directory[self.tail_page]
+
+            # if dict is not empty then check if the page is full
+            page = self.page_directory[self.tail_page]
+            if not page.has_capacity(columns):
+                self.tail_page += 1
+                page = Page()
+                self.page_directory.update({self.tail_page: page})
+                return self.page_directory[self.tail_page]
+            # otherwise return this page
+            return page
+
+
 
     """
     :param name: record. contain the data for each rows
     :param name: index. (actually location in the bytearray) used to write into the page
     """
-    def modify(self, record, index):
-        # load base page data & check for the base page to see any update
-        load_base_page = self.page_directory[index.page_number]
-        data = self.check_for_update(load_base_page.data[index.start_index:index.end_index+DATA_SIZE])
-
-        # translate data
-        old_record = Record(data[0], data[1], data[2], data[3], data[4], data[5], data[6:])
-        new_record = self.update_with_schema(record, old_record)
-
-        # write a new tail page
-        self.write(new_record, TYPE.TAIL)
-        tail_rid = self.tail_rid_lookup[record.record['key']]
-        if tail_rid is None :
-            print("can't find any tail rid match with key")
-            return
-
-        # change indirection for old data
-        indirection = tail_rid
-        load_base_page.modify(index, indirection)
+    def modify(self, key, new_record, index):
+        rid = self.key_to_rid[key]
+        index = self.rid_to_index[rid]
+        pages = self.page_directory[index.page_number]
+        pages[5].modify(index, new_record.rid)
 
     """
         This function will check for the row of data to see 
@@ -155,44 +230,5 @@ class Table:
             else:
                 ret_data.append(update_data[i])
         return ret_data
-
-    """
-        This function will be called by function[ write() ]
-        Is used to load a actual page for write function
-    """
-    def load_page(self, columns, modify_page=TYPE.BASE):
-        if TYPE.BASE == modify_page:
-            # if the dictionary is empty just create one page
-            if len(self.page_directory) == 0:
-                page = Page()
-                self.page_directory.update({self.base_page: page})
-                return self.page_directory[self.base_page]
-
-            # if dict is not empty then check if the page is full
-            page = self.page_directory[self.base_page]
-            if not page.has_capacity(columns):
-                self.base_page += 1
-                page = Page()
-                self.page_directory.update({self.base_page: page})
-                return self.page_directory[self.base_page]
-
-            # otherwise return this page
-            return page
-        else:
-            # if the dictionary is empty just create one page
-            if TAIL_PAGE_NUM not in self.page_directory:
-                page = Page()
-                self.page_directory.update({self.tail_page: page})
-                return self.page_directory[self.tail_page]
-
-            # if dict is not empty then check if the page is full
-            page = self.page_directory[self.tail_page]
-            if not page.has_capacity(columns):
-                self.tail_page += 1
-                page = Page()
-                self.page_directory.update({self.tail_page: page})
-                return self.page_directory[self.tail_page]
-            # otherwise return this page
-            return page
 
 

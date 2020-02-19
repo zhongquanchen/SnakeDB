@@ -10,9 +10,21 @@ class Page:
         self.num_records = 0
         self.data = bytearray(4096)
 
+    def read_data(self, start_index, end_index):
+        ret_data = []
+        data = self.data[start_index:end_index]
+        for i in range(end_index-start_index):
+            ret_data.append(data[i])
+        return ret_data
+
     """define the capacity of the page"""
     def has_capacity(self, columns):
         if self.num_records + columns >= 512:  # the capcity cannot exceed 512
+            return False
+        return True
+
+    def has_capacity(self):
+        if self.num_records + 1 >= 512:
             return False
         return True
 
@@ -31,7 +43,7 @@ class Page:
         str_val = str(indir)
         value_list = self.convert_8byte(str_val)
         for i in range(len(value_list)):
-            self.data[index.start_index+INDIRECTION_INDEX+i] = value_list[i]
+            self.data[index.start_index+i] = value_list[i]
 
     """Write 8 bytes into the page at a time"""
     def convert_8byte(self, input):
