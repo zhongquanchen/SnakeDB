@@ -7,7 +7,8 @@ class Database():
         pass
 
     def open(self):
-        pass
+        open('dbFile.txt', mode='a')
+        
 
     def close(self):
         pass
