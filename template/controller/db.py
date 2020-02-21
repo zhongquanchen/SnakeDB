@@ -1,4 +1,5 @@
-from template.table import Table
+from template.controller.table import Table
+from template.tools.config import *
 
 class Database():
 
@@ -7,7 +8,9 @@ class Database():
         pass
 
     def open(self):
-        pass
+        self.maxBufferSize = BUFFER_SIZE
+        self.currentBufferSize = 0
+        self.buffer = [None] * BUFFER_SIZE
 
     def close(self):
         pass
@@ -26,4 +29,10 @@ class Database():
     # Deletes the specified table
     """
     def drop_table(self, name):
+        pass
+
+    """
+    # Returns table with the passed name
+    """
+    def get_table(self, name):
         pass
