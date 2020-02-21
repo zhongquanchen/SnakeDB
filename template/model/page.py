@@ -9,6 +9,8 @@ class Page:
         self.physical_addr = 0
         self.num_records = 0
         self.data = bytearray(4096)
+        self.id = id
+        self.dirty = False
 
     def read_data(self, start_index, end_index):
         ret_data = []
@@ -55,3 +57,6 @@ class Page:
             hex_list.append(int(temp_str))
         hex_list.append(255)
         return hex_list
+
+    def is_dirty(self):
+        return self.dirty
