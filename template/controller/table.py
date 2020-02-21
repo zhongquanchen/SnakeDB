@@ -47,9 +47,6 @@ class Table:
         self.num_columns = num_columns
 
         self.page_directory = {}
-        self.col_to_key = {}
-        self.base_rid_lookup = {}
-        self.base_index_lookup = {}
 
         self.tail_rid_lookup = {}
         self.tail_index_lookup = {}

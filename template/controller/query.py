@@ -17,9 +17,9 @@ class Query:
 
     def delete(self, key):
         # delete data with key in base page
-        if key in self.table.base_rid_lookup:
+        if key in self.table.key_to_rid:
             try:
-                del self.table.base_rid_lookup[key]
+                del self.table.key_to_rid[key]
             except KeyError:
                 print("Key is not Found")
 

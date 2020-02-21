@@ -2,7 +2,7 @@
 # PageSize, StartRID, etc..
 import time
 import enum
-
+# milestone 1
 INTER_DATA_COL = 5
 DATA_SIZE = 8
 NUM_PAGE_RECORDS = 51
@@ -11,6 +11,10 @@ DEFAULT_LOCATION = 1000
 BASE_PAGE_NUM = 0
 TAIL_PAGE_NUM = 1000
 INDIRECTION_INDEX = 16
+
+# milestone 2
+BUFFERPOOL_SIZE = 100
+
 
 TOTAL_RID = 100000000
 CURRENT_RID = 1

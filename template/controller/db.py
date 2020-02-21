@@ -6,7 +6,7 @@ class Database():
         self.tables = []
         pass
 
-    def open(self):
+    def open(self, path):
         pass
 
     def close(self):
@@ -26,4 +26,10 @@ class Database():
     # Deletes the specified table
     """
     def drop_table(self, name):
+        pass
+
+    """
+    # Returns table with the passed name
+    """
+    def get_table(self, name):
         pass
