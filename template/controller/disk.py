@@ -1,4 +1,7 @@
-from template.controller.table import Table
+# from template.controller.table import Table
+from turtledemo.penrose import f
+
+from template.model import page
 from template.model.page import Page
 import os
 from os import path
@@ -29,14 +32,14 @@ class disk:
 
     def deletePage(self, page):
         filename = str(page.id)
-        if path.exists(filename)
+        if path.exists(filename):
             os.remove(filename)
         else:
             pass
 
     def writeTable(self, table):
         filename = table.name
-        with open(filename, 'wb') as f
+        with open(filename, 'wb') as f:
             pickle.dump(table, f)
         f.close()
 
@@ -48,7 +51,7 @@ class disk:
 
     def deleteTable(self, table):
         filename = table.name
-        if path.exists(filename)
+        if path.exists(filename):
             os.remove(filename)
         else:
             pass
