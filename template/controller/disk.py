@@ -17,7 +17,7 @@ class disk:
 
     def writePage(self, pages):
         self.page_record.update({pages.id:pages.pages[0].num_records})
-        filename = str(page.id)
+        filename = str(pages.pages_id)
         f = open(filename, 'wb')
         f.write(page.data)
         f.close()
