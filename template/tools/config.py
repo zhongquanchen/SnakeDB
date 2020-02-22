@@ -2,6 +2,7 @@
 # PageSize, StartRID, etc..
 import time
 import enum
+
 # milestone 1
 INTER_DATA_COL = 5
 DATA_SIZE = 8
@@ -16,7 +17,7 @@ BUFFER_SIZE = 100
 # milestone 2
 BUFFER_SIZE = 100
 RANDOM_ID = 10000
-
+SPACE_LEFT = 20
 TOTAL_RID = 100000000
 CURRENT_RID = 1
 

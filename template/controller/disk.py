@@ -11,8 +11,10 @@ import pickle
 class disk:
     def __init__(self, page_size):
         self.page_size = page_size
+        self.page_record = {}
 
     def writePage(self, page):
+        self.page_record.update({page.id})
         filename = str(page.id)
         f = open(filename, 'wb')
         f.write(page.data)

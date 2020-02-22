@@ -8,23 +8,23 @@ class Buffer:
     def __init__(self):
         # buffer pages
         self.bufferpool = {}
-        print("initialized")
-#        self.disk = disk()
         self.disk = disk(100)
         self.replace = LRU()
 
-    def new_page(self):
-        page = self.disk.allocate_page()
-        Page.increase_pin()
-        return page
-
+    # search for the correspond pages in buffer, if not then search in disk
     def fetch_page(self, page_id):
-        for Pages in self.buffer_pool:
-            if Pages.id == page_id:
-                return Pages
-        page = self.replace.evict()
-        if Page.is_dirty():
-            self.disk.write_page(page)
+        if page_id in self.bufferpool:
+            return self.bufferpool[page_id]
+
+        # find page in disk
+        page = self.disk.readPage(page_id)
+
+        # for Pages in self.buffer_pool:
+        #     if Pages.id == page_id:
+        #         return Pages
+        # page = self.replace.evict()
+        # if Page.is_dirty():
+        #     self.disk.write_page(page)
 
     # Close function
     def flush_page(self, page_id):
@@ -50,6 +50,11 @@ class Buffer:
                 return True
         return False
 
+    def bufferpool_capacity(self):
+        if len(self.bufferpool)+SPACE_LEFT > BUFFER_SIZE:
+            return False
+        return True
+
 
 class BufferManager:
 
@@ -57,28 +62,11 @@ class BufferManager:
         self.buffer = Buffer()
         self.cur_counter = 0
 
-    def insert(self):
-        # a layer between query and buffer to implement insert
-        pass
-
-    def update(self):
-        # a layer between query and buffer to implement update
-        pass
-
-    def select(self):
-        # a layer between query and buffer to implement select
-        pass
-
-    def loadPages(self):
-        # return a corresponding pages
-        pass
-
-    def update(self, pages):
-        self.cur_counter += 1
-        pages_id = RANDOM_ID + self.cur_counter
+    def update(self, pages_id, pages):
         self.buffer.bufferpool.update({pages_id:pages})
-        return pages_id
 
     def get_pages(self, pages_id):
         pages = self.buffer.bufferpool[pages_id]
         return pages
+
+

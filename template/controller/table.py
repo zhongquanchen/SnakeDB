@@ -1,6 +1,3 @@
-from template.model.page import *
-from time import time
-from template.tools.config import *
 from template.model.index import *
 from template.controller.buffer import *
 
@@ -80,10 +77,10 @@ class Table:
         record_array = self.record_to_array(record)
         # update key in database & look_for_page will check for the pages directory and update if needed
         pages = self.look_for_pages(modify_page)
-        start_index = pages[0].physical_addr
-        for i in range(len(pages)):
-            pages[i].write(record_array[i])
-        end_index = pages[0].physical_addr
+        start_index = pages.pages[0].physical_addr
+        for i in range(len(pages.pages)):
+            pages.pages[i].write(record_array[i])
+        end_index = pages.pages[0].physical_addr
 
         if modify_page == TYPE.BASE:
             self.key_to_rid.update({record.key: record.rid})
@@ -120,14 +117,16 @@ class Table:
             if len(self.page_directory) != 0:
                 pages_id = self.page_directory[self.current_page]
                 pages = self.buffer_manager.get_pages(pages_id)
-            if len(self.page_directory) == 0 or pages[0].has_capacity() == False:
+            if len(self.page_directory) == 0 or pages.pages[0].has_capacity() == False:
                 pages = []
                 for i in range(self.num_columns + INTER_DATA_COL):
                     page = Page()
                     pages.append(page)
-
                 self.current_page += 1
-                pages_id = self.buffer_manager.update(pages)
+
+                ret_pages = Pages(self.current_page, pages)
+                pages_id = ret_pages.pid
+                self.buffer_manager.update(pages_id, ret_pages)
                 self.page_directory.update({self.current_page: pages_id})
             return self.buffer_manager.get_pages(pages_id)
         else:
@@ -135,14 +134,15 @@ class Table:
             if self.tail_page in self.page_directory:
                 pages_id = self.page_directory[self.tail_page]
                 pages = self.buffer_manager.get_pages(pages_id)
-            if self.tail_page not in self.page_directory or pages[0].has_capacity() == False:
+            if self.tail_page not in self.page_directory or pages.pages[0].has_capacity() == False:
                 pages = []
                 for i in range(self.num_columns + INTER_DATA_COL):
                     page = Page()
                     pages.append(page)
-
                 self.tail_page += 1
-                pages_id = self.buffer_manager.update(pages)
+                ret_pages = Pages(self.tail_page, pages)
+                pages_id = ret_pages.pid
+                self.buffer_manager.update(pages_id, ret_pages)
                 self.page_directory.update({self.tail_page: pages_id})
             return self.buffer_manager.get_pages(pages_id)
 
@@ -156,7 +156,7 @@ class Table:
         index = self.rid_to_index[rid]
         pages_id = self.page_directory[index.page_number]
         pages = self.buffer_manager.get_pages(pages_id)
-        pages[5].modify(index, new_record.rid)
+        pages.pages[5].modify(index, new_record.rid)
 
     """
         This function will check for the row of data to see 
