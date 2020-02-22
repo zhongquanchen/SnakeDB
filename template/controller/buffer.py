@@ -8,6 +8,8 @@ class Buffer:
     def __init__(self):
         # buffer pages
         self.bufferpool = {}
+        self.buffersize = BUFFER_SIZE
+        self.cur_size = 0
         self.disk = disk(100)
         self.replace = LRU()
 
@@ -27,12 +29,12 @@ class Buffer:
         #     self.disk.write_page(page)
 
     # Close function
-    def flush_page(self, page_id):
-        for Pages in self.buffer_pool:
-            if Pages.id == page_id:
-                self.disk.write_page(Pages)
-                return True
-        return False
+    def flush_page(self, pages_len):
+        old_data = self.replace.pop_top()
+        if old_data in self.bufferpool:
+            self.disk.writePage(self.bufferpool[old_data])
+            del self.bufferpool[old_data]
+            self.cur_size -= pages_len
 
     def delete_page(self, page_id):
         for pages in self.bufferpool:
@@ -55,6 +57,29 @@ class Buffer:
             return False
         return True
 
+    """
+        will detect if the buffer pool is full and write it into the buffer pool
+    """
+    def update(self, pages_id, pages):
+        while not self.bufferpool_capacity():
+            print("size not enough")
+            self.flush_page(len(pages.pages))
+
+        self.cur_size += len(pages.pages)
+        self.bufferpool.update({pages_id: pages})
+        self.replace.use_append(pages_id)
+
+    def get_pages(self, pages_id):
+        if pages_id in self.bufferpool:
+            return self.bufferpool[pages_id]
+        else:
+            pages = self.disk.readPage(pages_id)
+            self.bufferpool.update({pages_id:pages})
+
+        self.replace.use_append(pages_id)
+        if pages is not None:
+            return pages
+
 
 class BufferManager:
 
@@ -63,10 +88,21 @@ class BufferManager:
         self.cur_counter = 0
 
     def update(self, pages_id, pages):
-        self.buffer.bufferpool.update({pages_id:pages})
+        self.buffer.update(pages_id,pages)
 
     def get_pages(self, pages_id):
-        pages = self.buffer.bufferpool[pages_id]
+        pages = self.buffer.get_pages(pages_id)
         return pages
 
+class LRU:
+    def __init__(self):
+        self.old = []
+
+    def use_append(self, pages_id):
+        if pages_id in self.old:
+            self.old.remove(pages_id)
+        self.old.append(pages_id)
+
+    def pop_top(self):
+        return self.old.pop(0)
 
