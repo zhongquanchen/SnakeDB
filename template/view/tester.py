@@ -3,7 +3,7 @@ from template.controller.query import Query
 # from template.config import init
 
 from random import choice, randint, sample, seed
-from colorama import Fore, Back, Style
+# from colorama import Fore, Back, Style
 
 # Student Id and 4 grades
 # init()

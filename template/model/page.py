@@ -3,6 +3,15 @@ from template.tools.config import *
 Implementation of Page for our SnakeSQL
 """
 
+
+"""
+use to store a record of pages. 10 pages are create for 1 record(10 columns)
+"""
+class Pages:
+    def __init__(self, id, pages):
+        self.pages = pages
+        self.pages_id = id
+
 class Page:
     """define page itself with a physical address, numbers of records"""
     def __init__(self):

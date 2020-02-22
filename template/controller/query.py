@@ -12,7 +12,6 @@ class Query:
     def __init__(self, table):
         self.table = table
         self.num_col = 0
-        self.buffer_manager = BufferManager()
         pass
 
     """ Delete the key in the dictionary, throw an exception when user want to update the deleted record """
@@ -60,7 +59,6 @@ class Query:
 
     def select(self, key, query_columns):
         data = self.find_data_by_key(key)
-
         if 0 != data[5]:
             data = self.check_for_update(data[5])
         ret_data = [data[0]]
@@ -117,7 +115,8 @@ class Query:
             print("can't find key in tail")
             exit()
         page_dir = self.table.tail_index_lookup[rid]
-        pages = self.table.page_directory[page_dir.page_number]
+        pages_id = self.table.page_directory[page_dir.page_number]
+        pages = self.table.buffer_manager.get_pages(pages_id)
         data = []
         for i in range(len(pages)):
             data.append(self.read_data(pages[i], page_dir.start_index, page_dir.end_index))
@@ -129,7 +128,8 @@ class Query:
             exit()
         rid = self.table.key_to_rid[key]
         page_dir = self.table.rid_to_index[rid]
-        pages = self.table.page_directory[page_dir.page_number]
+        pages_id = self.table.page_directory[page_dir.page_number]
+        pages = self.table.buffer_manager.get_pages(pages_id)
         data = []
         for i in range(len(pages)):
             data.append(self.read_data(pages[i], page_dir.start_index, page_dir.end_index))
