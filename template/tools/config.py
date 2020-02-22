@@ -3,6 +3,7 @@
 import time
 import enum
 
+# milestone 1
 INTER_DATA_COL = 5
 DATA_SIZE = 8
 NUM_PAGE_RECORDS = 51
@@ -11,16 +12,24 @@ DEFAULT_LOCATION = 1000
 BASE_PAGE_NUM = 0
 TAIL_PAGE_NUM = 1000
 INDIRECTION_INDEX = 16
-BUFFERPOOL_SIZE = 100
 
+# milestone 2
+BUFFER_SIZE = 100
+RANDOM_ID = 10000
+SPACE_LEFT = 20
+TOTAL_RID = 100000000
+CURRENT_RID = 1
 
 class TYPE(enum.Enum):
     BASE = 0
     TAIL = 1
 
+
 """
     translate_data function used to translate a data from page to a readable data for user
 """
+
+
 def translate_data(data):
     ret_list = []
     for i in range(10):
@@ -35,3 +44,5 @@ def translate_data(data):
                 record_str += temp_str
         ret_list.append(int(record_str))
     return ret_list
+
+

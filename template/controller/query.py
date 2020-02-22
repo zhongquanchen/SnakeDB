@@ -3,6 +3,7 @@ from template.controller.table import *
 from template.model.index import Index
 from template.model.page import *
 from template.tools.config import *
+from template.controller.buffer import *
 
 
 class Query:
@@ -17,9 +18,9 @@ class Query:
 
     def delete(self, key):
         # delete data with key in base page
-        if key in self.table.base_rid_lookup:
+        if key in self.table.key_to_rid:
             try:
-                del self.table.base_rid_lookup[key]
+                del self.table.key_to_rid[key]
             except KeyError:
                 print("Key is not Found")
 
@@ -31,114 +32,74 @@ class Query:
                 print("Key is not Found")
 
     """ Insert a record with specified columns """
+    """
+        format of array 
+        # self.key = key
+        # self.rid = rid
+        # self.columns = columns
+        # self.schema = schema_encode
+        # self.time = now
+        # self.indirect = indirect
+        # self.datas = datas
+    """
 
     def insert(self, *columns):
-        key = columns[0]  # the first of the column is key from user input
-        if key in self.table.base_rid_lookup:
-            print("key existed in db")
-            return
-
-        rid = key % 906659671
-        schema_encoding = '0' * self.table.num_columns
-
-        # unable to store float, so convert to int type
+        key = columns[0]
         cur_time = int(time.time())
+        rid = key % 100000000 # we use rid as the current, so when ever it create, it is unique
         indirect = 0
-
-        # put data into record, and store into table
+        schema_encoding = '0' * self.table.num_columns
         record = Record(key, rid, indirect, schema_encoding,
                         cur_time, self.num_col, list(columns[1:]))
-        self.table.write(record)
         self.num_col += 1
+        schema_encoding = '0' * self.table.num_columns
+        self.table.write(record)
 
     """ Select a record with specified columns"""
 
     def select(self, key, query_columns):
-        # check if key exist in table
-        if key not in self.table.base_rid_lookup:
-            print("can't find key")
-            exit()
-
-        # convert the type from the table to user interactable
-        page_data = self.select_bytearray(key)
-        newest_data = self.check_for_update(page_data)
-        temp_list = translate_data(newest_data)
-        list_for_user = []
-        list_for_user.append(temp_list[0])
-        for i in range(self.table.num_columns-1):
-            list_for_user.append(temp_list[6+i])
-        record = Record_For_User(temp_list[0], temp_list[1], list_for_user)
-        other_list = []
-        other_list.append(record)
-        return other_list
-
-    def select_bytearray(self, key):  # Select the page data
-        rid = self.table.base_rid_lookup[key]
-        index = self.table.base_index_lookup[rid]
-        page = self.table.page_directory[index.page_number]
-        page_data = page.data[index.start_index: index.end_index]
-        return page_data
-
-    def check_for_update(self, page_data):
-        list_data = translate_data(page_data)
-        if list_data[2] != 0:
-            index = self.table.tail_index_lookup[list_data[2]]
-            if list_data[2] not in self.table.tail_index_lookup:
-                print("can't find rid in tail page : def check_for_update()")
-            tail_page = self.table.page_directory[index.page_number]
-            tail_page_data = tail_page.data[index.start_index: index.end_index+DATA_SIZE]
-            return tail_page_data
-        else:
-            return page_data
+        data = self.find_data_by_key(key)
+        if 0 != data[5]:
+            data = self.check_for_update(data[5])
+        ret_data = [data[0]]
+        ret_data = ret_data + data[6:]
+        record = Record_For_User(ret_data[0], ret_data[1], ret_data)
+        list_data =[record]
+        return list_data
 
     """ Update a record with specified key and columns """
 
     def update(self, key, *columns):
-        # find the old data in the table
-        rid = self.table.base_rid_lookup[key]  # look up the data location
-        index = self.table.base_index_lookup[rid]
-        page = self.table.page_directory[index.page_number]
-        page_data = page.data[index.start_index: index.end_index]
-        data = translate_data(page_data)  # translate data from bytearray
-
-        # modify the new record and put them into table
-        new_rid = data[1] * 10 + 1
-        new_scheme = self.modify_schema(list(columns))
-        modify_record = Record(
-            columns[0], new_rid, data[2], new_scheme, data[4], data[5], list(columns[1:]))
-        self.table.modify(modify_record, index)  # modify data with key
-
-    def modify_schema(self, columns):
-        schema = ''
-        for i in range(len(columns)):
-            if columns[i] is None:
-                schema += '0'
-            else:
-                schema += '1'
-        return schema
+        rid = self.table.key_to_rid[key]  # look up the data location
+        index = self.table.rid_to_index[rid]
+        old_data = self.find_data_by_key(key)
+        new_data = self.combine_old_data(old_data, *columns)
+        new_record = Record(new_data[0], new_data[1], new_data[2], new_data[3], new_data[4], new_data[5], new_data[6:])
+        self.table.modify(key, new_record, index)
+        self.table.write(new_record, TYPE.TAIL)
 
     """
     :param start_range: int         # Start of the key range to aggregate 
     :param end_range: int           # End of the key range to aggregate 
     :param aggregate_columns: int  # Index of desired column to aggregate
     """
-
     def sum(self, start_range, end_range, aggregate_column_index):
         # sort the key in dictionary
         # sum them up by two range
-        num_record_in_page = self.table.page_directory[0].num_records / (
-            self.table.num_columns + INTER_DATA_COL)
-        keys_col = self.find_keys(start_range, end_range)  # find two key
         sum = 0
         sorted_keys = sorted(
-            self.table.base_rid_lookup.items(), key=operator.itemgetter(0))
+            self.table.key_to_rid.items(), key=operator.itemgetter(0))
         on_add = False
         for i in range(end_range - start_range+1):
-            if start_range + i in self.table.base_rid_lookup:
+            if start_range + i in self.table.key_to_rid:
                 data = self.select(start_range + i, [1, 1, 1, 1, 1])[0]
                 sum += data.columns[aggregate_column_index]
         return sum
 
+
+    """
+    an extension to help implement above's functions
+    """
     def find_keys(self, start_range, end_range):
         a = 0
         b = 0
@@ -148,3 +109,54 @@ class Query:
             if value == end_range:
                 b = key
         return [a, b]
+
+    def check_for_update(self, rid):
+        if rid not in self.table.tail_index_lookup:
+            print("can't find key in tail")
+            exit()
+        page_dir = self.table.tail_index_lookup[rid]
+        pages_id = self.table.page_directory[page_dir.page_number]
+        pages = self.table.buffer_manager.get_pages(pages_id)
+        data = []
+        for i in range(len(pages.pages)):
+            data.append(self.read_data(pages.pages[i], page_dir.start_index, page_dir.end_index))
+        return data
+
+    def find_data_by_key(self, key):
+        if key not in self.table.key_to_rid:
+            print("can't find key")
+            exit()
+        rid = self.table.key_to_rid[key]
+        page_dir = self.table.rid_to_index[rid]
+        pages_id = self.table.page_directory[page_dir.page_number]
+        pages = self.table.buffer_manager.get_pages(pages_id)
+        data = []
+        for i in range(len(pages.pages)):
+            data.append(self.read_data(pages.pages[i], page_dir.start_index, page_dir.end_index))
+        return data
+
+    def read_data(self, page, start_index, end_index):
+        # this is raw data, not handled
+        data = page.read_data(start_index, end_index)
+        ret_data = ''
+        for i in range(len(data)):
+            if data[i] < 10:
+                ret_data += '0' + str(data[i])
+            elif 255 == data[i]:
+                break
+            else:
+                ret_data += str(data[i])
+        return int(ret_data)
+
+    def combine_old_data(self, old_data, *columns):
+        if old_data[5] != 0:
+            old_data = self.check_for_update(old_data[5])
+        filtered_data = old_data
+        if columns[0] is not None:
+            filtered_data[0] = columns[0]
+
+        for i in range(len(columns)-1):
+            if columns[i+1] is not None:
+                filtered_data[6+i] = columns[i+1]
+        filtered_data[1] = int(old_data[1]*10) + 1
+        return filtered_data

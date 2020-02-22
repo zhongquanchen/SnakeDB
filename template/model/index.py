@@ -7,6 +7,7 @@
 # will have page number, record start index, and record end index
 """
 
+
 class Index:
 
     def __init__(self, *indexes):
