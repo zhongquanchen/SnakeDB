@@ -17,27 +17,40 @@ class disk:
 
     def writePage(self, pages):
         self.page_record.update({pages.id:pages.pages[0].num_records})
-        filename = str(pages.pages_id)
+        if not os.path.exists('dbFile')
+            os.makedirs('dbFile')
+        
+        cwd = os.getcwd() #get the current working path
+        filename = cwd + '/dbfile/' + str(pages.pages_id)
         f = open(filename, 'wb')
-        f.write(page.data)
+
+        for page in pages.pages:   
+            f.write(page.data)
+            f.write(os.linesep) #write a new line sign in the current working OS
         f.close()
 
 
         
-    def readPage(self, pageID):
-        filename = str(pageID)
+    def readPage(self, pages_id, num_pages):
+        cwd = os.getcwd() #get the current working path
+        filename = cwd + '/dbfile/' + str(pages_id)
         f = open(filename, 'rb')
-        p = Page()
-        p.physical_addr = 0
-        p.num_records = 0
-        p.data = f.read()
-        p.id = pageID
-        p.dirty = False
-        p.pin_num = 0
-        return page
+        
+        pages = {pages, pages_id}
+        pages.pages = []
+        
+        for i in num_pages:
+            p = Page()
+            pageData = f.readline()
+            p.physical_addr = 0
+            p.num_records = 0
+            pages.pages.append(page)
+        
+        return pages
 
-    def deletePage(self, page):
-        filename = str(page.id)
+    def deletePage(self, pages):
+        cwd = os.getcwd() #get the current working path
+        filename = cwd + '/dbfile/' + str(pages.pages_id)
         if path.exists(filename):
             os.remove(filename)
         else:
