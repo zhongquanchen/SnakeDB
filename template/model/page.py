@@ -11,6 +11,7 @@ class Page:
         self.data = bytearray(4096)
         self.id = id
         self.dirty = False
+        self.pin = 0
 
     def read_data(self, start_index, end_index):
         ret_data = []
@@ -60,3 +61,9 @@ class Page:
 
     def is_dirty(self):
         return self.dirty
+
+    def is_pinning(self):
+        if self.pin > 0:
+            return True
+        else
+            return False
