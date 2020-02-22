@@ -1,5 +1,6 @@
 from template.controller.table import Table
 from template.tools.config import *
+from template.controller.buffer import  *
 
 class Database():
 
@@ -10,8 +11,9 @@ class Database():
     def open(self):
         self.maxBufferSize = BUFFER_SIZE
         self.currentBufferSize = 0
-        self.buffer = [None] * BUFFER_SIZE
-    
+        #NEED TO inlcude Buffersize in Buffer initialization
+        self.buffer = Buffer()
+
 
     def close(self):
         pass
