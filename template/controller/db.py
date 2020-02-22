@@ -11,6 +11,7 @@ class Database():
         self.maxBufferSize = BUFFER_SIZE
         self.currentBufferSize = 0
         self.buffer = [None] * BUFFER_SIZE
+    
 
     def close(self):
         pass
