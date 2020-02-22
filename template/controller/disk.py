@@ -13,12 +13,16 @@ class disk:
         self.page_size = page_size
         self.page_record = {}
 
-    def writePage(self, page):
-        self.page_record.update({page.id})
+# pages : class Pages {pages, pages_id}
+
+    def writePage(self, pages):
+        self.page_record.update({pages.id:pages.pages[0].num_records})
         filename = str(page.id)
         f = open(filename, 'wb')
         f.write(page.data)
         f.close()
+
+
         
     def readPage(self, pageID):
         filename = str(pageID)
