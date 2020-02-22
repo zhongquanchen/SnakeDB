@@ -14,7 +14,7 @@ class disk:
         f.write(page.data)
         f.close()
         
-    def readPage(self, pageID)
+    def readPage(self, pageID):
         filename = str(pageID)
         f = open(filename, 'rb')
         p = Page()
