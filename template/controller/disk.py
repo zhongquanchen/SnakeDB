@@ -1,7 +1,8 @@
 from template.controller.table import Table
-from template.model.page import *
+from template.model.page import Page
 import os
 from os import path
+import pickle
 
 
 class disk:
@@ -28,6 +29,25 @@ class disk:
 
     def deletePage(self, page):
         filename = str(page.id)
+        if path.exists(filename)
+            os.remove(filename)
+        else:
+            pass
+
+    def writeTable(self, table):
+        filename = table.name
+        with open(filename, 'wb') as f
+            pickle.dump(table, f)
+        f.close()
+
+    def readTable(self, tableName):
+        filename = tableName
+        table = pickle.load(open(filename, 'rb'))
+        f.close()
+        return table
+
+    def deleteTable(self, table):
+        filename = table.name
         if path.exists(filename)
             os.remove(filename)
         else:
