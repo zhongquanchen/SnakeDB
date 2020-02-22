@@ -4,10 +4,6 @@ class disk():
     def __init__(self, page_size):
         self.page_size = page_size
 
-<<<<<<< Updated upstream
-    def writePage(self, page):
-        pass
-=======
     def writePage(self, pages):
         self.page_record.update({pages.id:pages.pages[0].num_records})
         self.page_len = len(pages.pages)
@@ -29,7 +25,6 @@ class disk():
             pages.append(page)
         ret_pages = Pages(pageID, pages)
         return ret_pages
->>>>>>> Stashed changes
 
     def deletePage(self, page):
         pass
