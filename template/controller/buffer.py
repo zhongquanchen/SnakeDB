@@ -3,9 +3,10 @@ from template.model.page import *
 from template.controller.disk import *
 from template.controller.replace import *
 
+
 class buffer:
     def __init__(self):
-        self.buffer = []
+        self.buffer_pool = []
         self.disk = disk()
 
     def fetch_page(self, page_id):
