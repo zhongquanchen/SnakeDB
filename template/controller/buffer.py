@@ -17,16 +17,9 @@ class Buffer:
     def fetch_page(self, page_id):
         if page_id in self.bufferpool:
             return self.bufferpool[page_id]
-
         # find page in disk
-        page = self.disk.readPage(page_id)
-
-        # for Pages in self.buffer_pool:
-        #     if Pages.id == page_id:
-        #         return Pages
-        # page = self.replace.evict()
-        # if Page.is_dirty():
-        #     self.disk.write_page(page)
+        pages = self.disk.readPage(page_id)
+        return page
 
     # Close function
     def flush_page(self, pages_len):
@@ -53,7 +46,7 @@ class Buffer:
         return False
 
     def bufferpool_capacity(self):
-        if len(self.bufferpool)+SPACE_LEFT > BUFFER_SIZE:
+        if self.cur_size+SPACE_LEFT > BUFFER_SIZE:
             return False
         return True
 
