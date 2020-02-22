@@ -77,8 +77,8 @@ class Query:
         page_dir = self.table.tail_index_lookup[rid]
         pages = self.table.page_directory[page_dir.page_number]
         data = []
-        for i in range(len(pages)):
-            data.append(self.read_data(pages[i], page_dir.start_index, page_dir.end_index))
+        for i in range(len(pages.pages)):
+            data.append(self.read_data(pages.pages[i], page_dir.start_index, page_dir.end_index))
         return data
 
     def find_data_by_key(self, key):
@@ -89,8 +89,8 @@ class Query:
         page_dir = self.table.rid_to_index[rid]
         pages = self.table.page_directory[page_dir.page_number]
         data = []
-        for i in range(len(pages)):
-            data.append(self.read_data(pages[i], page_dir.start_index, page_dir.end_index))
+        for i in range(len(pages.pages)):
+            data.append(self.read_data(pages.pages[i], page_dir.start_index, page_dir.end_index))
         return data
 
     def read_data(self, page, start_index, end_index):

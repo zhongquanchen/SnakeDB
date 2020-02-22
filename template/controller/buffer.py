@@ -5,49 +5,38 @@ from template.controller.replace import *
 
 class buffer:
     def __init__(self):
-<<<<<<< Updated upstream
-        self.buffer = []
-        self.disk = disk()
-=======
         # buffer pages
         self.bufferpool = {}
-        self.buffersize = BUFFER_SIZE
+        self.buffersize = BUFFERPOOL_SIZE
         self.cur_size = 0
         self.disk = disk(100)
         self.replace = LRU()
->>>>>>> Stashed changes
 
     def fetch_page(self, page_id):
-        for pages in self.buffer:
-            if pages.id == page_id:
-                return pages
-        page = self.replace.evict()
-        if page.is_dirty():
-            self.disk.writePage(page)
+        if page_id in self.bufferpool:
+            return self.bufferpool[page_id]
+
+        # find page in disk
+        page = self.disk.readPage(page_id)
+        return page
+        # for Pages in self.buffer_pool:
+        #     if Pages.id == page_id:
+        #         return Pages
+        # page = self.replace.evict()
+        # if Page.is_dirty():
+        #     self.disk.write_page(page)
 
     # Close function
-<<<<<<< Updated upstream
-    def flush_page(self, page_id):
-        for pages in self.buffer:
-            if pages.id == page_id:
-                self.disk.writePage(pages)
-                return True
-        return False
-=======
     def flush_page(self, pages_len):
         old_data = self.replace.pop_top()
         if old_data in self.bufferpool:
             self.disk.writePage(self.bufferpool[old_data])
             del self.bufferpool[old_data]
             self.cur_size -= pages_len
->>>>>>> Stashed changes
 
     def delete_page(self, page_id):
         for pages in self.buffer:
             if pages.id == page_id:
-<<<<<<< Updated upstream
-                self.disk.deletePage(pages)
-=======
                 self.disk.delete_page(pages)
 
     def unpinning_page(self, page_id, is_dirty):
@@ -62,7 +51,7 @@ class buffer:
         return False
 
     def bufferpool_capacity(self):
-        if self.cur_size+SPACE_LEFT > BUFFER_SIZE:
+        if self.cur_size+SPACE_LEFT > BUFFERPOOL_SIZE:
             return False
         return True
 
@@ -91,7 +80,7 @@ class buffer:
 
 class BufferManager:
     def __init__(self):
-        self.buffer = Buffer()
+        self.buffer = buffer()
         self.cur_counter = 0
 
     def update(self, pages_id, pages):
@@ -101,14 +90,13 @@ class BufferManager:
         pages = self.buffer.get_pages(pages_id)
         return pages
 
->>>>>>> Stashed changes
 
 class LRU:
     def __init__(self):
         self.old = []
 
     def use_append(self, pages_id):
-        if page in self.old:
+        if pages_id in self.old:
             self.old.remove(pages_id)
         self.old.append(pages_id)
 

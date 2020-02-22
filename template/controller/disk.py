@@ -1,8 +1,9 @@
-from template.controller.table import Table
+#from template.controller.table import Table
 
 class disk():
     def __init__(self, page_size):
         self.page_size = page_size
+        self.page_record = {}
 
     def writePage(self, pages):
         self.page_record.update({pages.id:pages.pages[0].num_records})

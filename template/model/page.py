@@ -3,6 +3,15 @@ from template.tools.config import *
 Implementation of Page for our SnakeSQL
 """
 
+class Pages:
+    def __init__(self, cur_counter, pages):
+        self.pid = RANDOM_ID + cur_counter
+        self.pages = pages
+        self.id = id
+        self.dirty = False
+        self.pin_num = 0
+
+
 class Page:
     """define page itself with a physical address, numbers of records"""
     def __init__(self):
