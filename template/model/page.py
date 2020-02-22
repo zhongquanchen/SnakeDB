@@ -19,6 +19,7 @@ class Page:
         self.num_records = 0
         self.data = bytearray(4096)
 
+
     def read_data(self, start_index, end_index):
         ret_data = []
         data = self.data[start_index:end_index]
