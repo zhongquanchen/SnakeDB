@@ -123,7 +123,6 @@ class Table:
                     page = Page()
                     pages.append(page)
                 self.current_page += 1
-
                 ret_pages = Pages(self.current_page, pages)
                 pages_id = ret_pages.pid
                 self.buffer_manager.update(pages_id, ret_pages)
