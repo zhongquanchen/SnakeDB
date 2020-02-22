@@ -17,3 +17,11 @@ template/model/__pycache__/page.cpython-37.pyc
 template/tools/__pycache__/config.cpython-37.pyc
 .idea/ECS165-milestone1.iml
 *.iml
+template/controller/__pycache__/buffer.cpython-37.pyc
+template/controller/__pycache__/db.cpython-37.pyc
+template/controller/__pycache__/disk.cpython-37.pyc
+template/controller/__pycache__/LRU.cpython-37.pyc
+template/controller/__pycache__/query.cpython-37.pyc
+template/controller/__pycache__/replace.cpython-37.pyc
+template/controller/__pycache__/table.cpython-37.pyc
+*.pyc
