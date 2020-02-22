@@ -29,3 +29,20 @@ class buffer:
             if pages.id == page_id:
                 self.disk.deletePage(pages)
 
+
+class BufferManager:
+
+    def __init__(self):
+        self.buffer = buffer()
+
+    def insert(self):
+        # a layer between query and buffer to implement insert
+        pass
+
+    def update(self):
+        # a layer between query and buffer to implement update
+        pass
+
+    def select(self):
+        # a layer between query and buffer to implement select
+        pass

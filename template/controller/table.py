@@ -33,11 +33,6 @@ class Record_For_User:
     :Table will used to store page directories, and all the ids, rid, columns, etc.
 """
 class Table:
-    """
-    :param name: string         #Table name
-    :param num_columns: int     #Number of Columns: all columns are integer
-    :param key: int             #Index of table key in columns
-    """
     def __init__(self, name, num_columns, key):
         self.base_page = BASE_PAGE_NUM
         self.tail_page = TAIL_PAGE_NUM
