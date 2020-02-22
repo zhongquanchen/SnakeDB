@@ -21,7 +21,7 @@ class disk:
             os.makedirs('dbFile')
         
         cwd = os.getcwd() #get the current working path
-        filename = cwd + '/dbfile/' + str(pages.pages_id)
+        filename = cwd + '/dbFile/' + str(pages.pages_id)
         f = open(filename, 'wb')
 
         for page in pages.pages:   
@@ -33,7 +33,7 @@ class disk:
         
     def readPage(self, pages_id, num_pages):
         cwd = os.getcwd() #get the current working path
-        filename = cwd + '/dbfile/' + str(pages_id)
+        filename = cwd + '/dbFile/' + str(pages_id)
         f = open(filename, 'rb')
         
         pages = {pages, pages_id}
@@ -50,7 +50,7 @@ class disk:
 
     def deletePage(self, pages):
         cwd = os.getcwd() #get the current working path
-        filename = cwd + '/dbfile/' + str(pages.pages_id)
+        filename = cwd + '/dbFile/' + str(pages.pages_id)
         if path.exists(filename):
             os.remove(filename)
         else:
