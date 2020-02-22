@@ -1,7 +1,8 @@
 from template.tools.config import *
 from template.model.page import *
 from template.controller.disk import *
-from template.controller.replace import *
+from template.controller.LRU import *
+
 
 class Buffer:
     def __init__(self):
@@ -9,27 +10,45 @@ class Buffer:
         self.bufferpool = {}
         print("initialized")
 #        self.disk = disk()
+        self.disk = disk(100)
+        self.replace = LRU()
+
+    def new_page(self):
+        page = self.disk.allocate_page()
+        Page.increase_pin()
+        return page
 
     def fetch_page(self, page_id):
-        for pages in self.bufferpool:
-            if pages.id == page_id:
-                return pages
+        for Pages in self.buffer_pool:
+            if Pages.id == page_id:
+                return Pages
         page = self.replace.evict()
-        if page.is_dirty():
-            self.disk.writePage(page)
+        if Page.is_dirty():
+            self.disk.write_page(page)
 
     # Close function
     def flush_page(self, page_id):
-        for pages in self.bufferpool:
-            if pages.id == page_id:
-                self.disk.writePage(pages)
+        for Pages in self.buffer_pool:
+            if Pages.id == page_id:
+                self.disk.write_page(Pages)
                 return True
         return False
 
     def delete_page(self, page_id):
         for pages in self.bufferpool:
             if pages.id == page_id:
-                self.disk.deletePage(pages)
+                self.disk.delete_page(pages)
+
+    def unpinning_page(self, page_id, is_dirty):
+        for Pages in self.buffer_pool:
+            if Pages.index == page_id:
+                Pages.decrease_pin()
+                if is_dirty:
+                    Pages.dirty = True
+                if Pages.pin_num == 0:
+                    self.replace.use_append(Pages)
+                return True
+        return False
 
 
 class BufferManager:
