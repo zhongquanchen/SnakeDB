@@ -8,7 +8,9 @@ class Database():
         self.tables = []
         pass
 
-    def open(self):
+    def open(self, path):
+        #path = table file location
+
         self.maxBufferSize = BUFFER_SIZE
         self.currentBufferSize = 0
         #NEED TO inlcude Buffersize in Buffer initialization
@@ -38,4 +40,5 @@ class Database():
     # Returns table with the passed name
     """
     def get_table(self, name):
+        return self.tables
         pass
