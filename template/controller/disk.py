@@ -16,7 +16,13 @@ class disk:
     def readPage(self, pageID)
         filename = str(pageID)
         f = open(filename, 'rb')
-        page = Page(0, 0, f.read(), pageID, false)
+        Page p
+        p.physical_addr = 0
+        p.num_records = 0
+        p.data = f.read()
+        p.id = pageID
+        p.dirty = False
+        p.pin_num = 0
         return page
 
     def deletePage(self, page):
