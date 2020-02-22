@@ -2,7 +2,8 @@ from template.controller.table import Table
 import os
 from os import path
 
-class disk():
+
+class disk:
     def __init__(self, page_size):
         self.page_size = page_size
 
