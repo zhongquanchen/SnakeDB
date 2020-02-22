@@ -1,11 +1,15 @@
 from template.controller.table import Table
 
-class disk():
+
+class disk:
     def __init__(self, page_size):
         self.page_size = page_size
 
-    def writePage(self, page):
+    def write_page(self, page):
         pass
 
-    def deletePage(self, page):
+    def allocate_page(self):
+        pass
+
+    def delete_page(self, page):
         pass
