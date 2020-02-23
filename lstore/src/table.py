@@ -1,6 +1,5 @@
-from template.model.index import *
-from template.controller.buffer import *
-
+from lstore.src.index import *
+from lstore.src.buffer import *
 
 """
     :Record is used as a format to write into the page, [this is for admin use]
@@ -62,7 +61,6 @@ class Table:
         # all the modify page will store in buffer
         self.buffer_manager = BufferManager()
 
-
     def __merge(self):
         pass
 
@@ -80,7 +78,6 @@ class Table:
         for i in range(len(pages.pages)):
             pages.pages[i].write(record_array[i])
         end_index = pages.pages[0].physical_addr
-
         if modify_page == TYPE.BASE:
             self.key_to_rid.update({record.key: record.rid})
             self.rid_to_index.update({record.rid: Index(self.current_page, start_index, end_index)})

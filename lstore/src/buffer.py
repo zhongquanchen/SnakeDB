@@ -1,6 +1,6 @@
-from template.tools.config import *
-from template.model.page import *
-from template.controller.disk import *
+from lstore.src.config import *
+from lstore.src.page import *
+from lstore.src.disk import *
 
 
 class Buffer:
@@ -54,7 +54,7 @@ class Buffer:
     """
     def update(self, pages_id, pages):
         while not self.bufferpool_capacity():
-            print("size not enough")
+            # print("size not enough")
             self.flush_page(len(pages.pages))
 
         self.cur_size += len(pages.pages)
@@ -72,7 +72,6 @@ class Buffer:
             return pages
 
 class BufferManager:
-
     def __init__(self):
         self.buffer = Buffer()
         self.cur_counter = 0
@@ -96,3 +95,15 @@ class LRU:
     def pop_top(self):
         return self.old.pop(0)
 
+    # def access(self, page):
+    #     if page in self.buffer:
+    #         self.use_append(page)
+    #         return
+    #     if None in self.buffer:
+    #         self.buffer[self.buffer.index(None)] = page
+    #         self.use_append(page)
+    #         return
+    #     assert (len(self.old) > 0)
+    #     is_replace = self.old.pop(0)
+    #     self.buffer[self.buffer.index(is_replace)] = page
+    #     self.use_append(page)
