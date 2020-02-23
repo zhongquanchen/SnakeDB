@@ -14,9 +14,12 @@ import threading
 
 class merge :
 
-    def __init__(self):
+    def __init__(self, base_page):
         self.locking = False
         self.thread = threading.Thread(target=self.merged())
+        self.old_base = base_page
+        self.new_base = base_page
+        self.locking = False
 
     # start a merge process
     def merge_process(self):
