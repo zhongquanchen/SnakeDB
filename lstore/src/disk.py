@@ -1,7 +1,7 @@
 # from template.controller.table import Table
 from turtledemo.penrose import f
-from template.model import page
-from template.model.page import Page
+
+
 import os
 from os import path
 import pickle

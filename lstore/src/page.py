@@ -1,4 +1,4 @@
-from template.tools.config import *
+from lstore.src.config import *
 
 """
 Implementation of Page for our SnakeSQL

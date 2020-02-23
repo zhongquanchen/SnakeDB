@@ -1,5 +1,5 @@
-from template.model.index import *
-from template.controller.buffer import *
+from lstore.src.index import *
+from lstore.src.buffer import *
 
 """
     :Record is used as a format to write into the page, [this is for admin use]

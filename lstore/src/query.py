@@ -1,9 +1,8 @@
 import operator
-from template.controller.table import *
-from template.model.index import Index
-from template.model.page import *
-from template.tools.config import *
-from template.controller.buffer import *
+from lstore.src.table import *
+from lstore.src.page import *
+from lstore.src.config import *
+from lstore.src.buffer import *
 
 
 class Query:

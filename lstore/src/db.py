@@ -1,6 +1,6 @@
-from template.controller.table import Table
-from template.tools.config import *
-from template.controller.buffer import  *
+from lstore.src.table import Table
+from lstore.src.config import *
+from lstore.src.buffer import  *
 
 class Database():
 

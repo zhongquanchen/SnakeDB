@@ -1,6 +1,6 @@
-from template.tools.config import *
-from template.model.page import *
-from template.controller.disk import *
+from lstore.src.config import *
+from lstore.src.page import *
+from lstore.src.disk import *
 
 
 class Buffer:
