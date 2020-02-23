@@ -33,5 +33,8 @@ class merge :
         for key in self.table.key_to_rid:
             print("all the keys ", key, " rids: ", self.table.key_to_rid[key])
 
-
-
+    # copy the base page
+    def copy_base_page(self, old_page, new_page):
+        merge.run_all_base_page(old_page);
+        new_page = old_page
+        return new_page
