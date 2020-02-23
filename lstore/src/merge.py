@@ -1,4 +1,5 @@
 from time import *
+from lstore.src.table import *
 import threading
 
 # 1. have the base page and tail merge together
@@ -10,9 +11,10 @@ import threading
 
 class merge :
 
-    def __init__(self):
+    def __init__(self, table):
         self.locking = False
         self.thread = threading.Thread(target=self.merged())
+        self.table = table
 
     # start a merge process
     def merge_process(self):
@@ -26,6 +28,10 @@ class merge :
 
     def tail_record_points_back(self):
         pass
+
+    def run_all_base_page(self):
+        for key in self.table.key_to_rid:
+            print("all the keys ", key, " rids: ", self.table.key_to_rid[key])
 
 
 
