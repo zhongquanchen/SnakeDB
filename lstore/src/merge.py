@@ -1,4 +1,7 @@
-
+from lstore.src.config import *
+from lstore.src.query import *
+from lstore.src.table import *
+from lstore.src.page import *
 # 1. have the base page and tail merge together
      #. need to run in background
      #. all the base page will copy to a new buffer pool
@@ -8,8 +11,14 @@
 
 class merge :
 
-    def __init__(self):
+    def __init__(self, base_page):
+        self.new_base = base_page
+        self.old_base = base_page
         pass
+
+    def update_tail_to_new(self):
+        for i in range(old_base)
+            ###todo
 
     def merged(self):
         pass
