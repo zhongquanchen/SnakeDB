@@ -59,7 +59,7 @@ class Table:
         # current page index
         self.current_page = 0
         # all the modify page will store in buffer
-        self.buffer_manager = BufferManager()
+        self.buffer_manager = BufferManager(self.name)
 
     def __merge(self):
         pass

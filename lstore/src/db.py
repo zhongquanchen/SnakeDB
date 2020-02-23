@@ -9,12 +9,17 @@ class Database():
         pass
 
     def open(self, path):
-        #path = table file location
+        try:
+            os.mkdir(path)
+        except OSError:
+            print("Creation of the directory %s failed" % path)
+        else:
+            print("Successfully created the directory %s " % path)
 
         self.maxBufferSize = BUFFER_SIZE
-        self.currentBufferSize = 0
         #NEED TO inlcude Buffersize in Buffer initialization
         self.buffer = Buffer()
+        self.buffersize = self.buffer.size()
 
 
     def close(self):
