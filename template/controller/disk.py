@@ -17,16 +17,15 @@ class disk:
 
     def writePage(self, pages):
         self.page_record.update({pages.id:pages.pages[0].num_records})
-        if not os.path.exists('dbFile')
+        if not os.path.exists('dbFile'):
             os.makedirs('dbFile')
         
         cwd = os.getcwd() #get the current working path
         filename = cwd + '/dbFile/' + str(pages.pages_id)
-        f = open(filename, 'wb')
 
-        for page in pages.pages:   
-            f.write(page.data)
-            f.write(os.linesep) #write a new line sign in the current working OS
+        f = open(filename, 'wb')
+        pickle.dump(pages, f)
+        
         f.close()
 
 
@@ -36,16 +35,7 @@ class disk:
         filename = cwd + '/dbFile/' + str(pages_id)
         f = open(filename, 'rb')
         
-        pages = {pages, pages_id}
-        pages.pages = []
-        
-        for i in num_pages:
-            p = Page()
-            pageData = f.readline()
-            p.physical_addr = 0
-            p.num_records = 0
-            pages.pages.append(page)
-        
+        pages = pickle.load(open(filename, 'rb'))
         return pages
 
     def deletePage(self, pages):
