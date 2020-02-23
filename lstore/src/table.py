@@ -10,6 +10,7 @@ class Record:
     def __init__(self, key, rid, indirect, schema_encode, now, columns, datas):
         self.record = {}
         self.create_record(rid, key, columns, schema_encode, now, indirect, datas)
+        self.baserid = 0
 
     def create_record(self, rid, key, columns, schema_encode, now, indirect, datas):
         self.key = key

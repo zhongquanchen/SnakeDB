@@ -1,5 +1,73 @@
 Creation of the directory ~/ECS165 failed
 Insert finished
 Select finished
+start merging processupdate error on [92106679, 18, 13, 5, 7] and [None, 1, None, None, None] : 
+<lstore.src.table.Record_For_User object at 0x10cdf41c0> , correct: [92106679, 1, 13, 5, 7]
+start merging process
+start merging process
+start merging process
+start merging process
+start merging process
+start merging process
+start merging processupdate error on [92106429, 20, 1, 18, 1] and [None, 11, None, None, None] 
+: <lstore.src.table.Record_For_User object at 0x10cfaae80> , correct: [92106429, 11, 1, 18, 1]
+start merging processupdate error on [92106679, 19, 11, 13, 2] and [None, 9, None, None, None] 
+: <lstore.src.table.Record_For_User object at 0x10cfe1bb0> , correct: [92106679, 9, 11, 13, 2]
+start merging processupdate error on [92106929, 10, 17, 3, 13] and [None, 1, None, None, None] 
+: <lstore.src.table.Record_For_User object at 0x10d019cd0> , correct: [92106929, 1, 17, 3, 13]
+start merging process
+start merging processupdate error on [92106429, 11, 20, 9, 13] and [None, None, 12, None, None] : <lstore.src.table.Record_For_User object at 0x10d088610> , correct: [92106429, 11, 12, 9, 13]
+
+start merging processupdate error on [92106679, 9, 19, 6, 4] and [None, 17, None, None, None] 
+: <lstore.src.table.Record_For_User object at 0x10cf36820> , correct: [92106679, 17, 19, 6, 4]
+start merging processupdate error on [92106929, 1, 2, 11, 0] and [None, 9, None, None, None] 
+: <lstore.src.table.Record_For_User object at 0x10cf6e520> , correct: [92106929, 9, 2, 11, 0]
+start merging processupdate error on [92107179, 7, 19, 8, 20] and [None, 18, None, None, None] : 
+<lstore.src.table.Record_For_User object at 0x10d17f370> , correct: [92107179, 18, 19, 8, 20]
+start merging process
+start merging processupdate error on [92106679, 17, 14, 15, 1] and [None, 0, None, None, None] : <lstore.src.table.Record_For_User object at 0x10d1edbe0> , correct: [92106679, 0, 14, 15, 1]
+update error on [92106679, 0, 14, 15, 1] and [None, None, 17, None, None] : <lstore.src.table.Record_For_User object at 0x10d1edaf0> , correct: [92106679, 0, 17, 15, 1]
+update error on [92106679, 0, 17, 15, 1] and [None, None, None, 17, None] : <lstore.src.table.Record_For_User object at 0x10d224d60> , correct: [92106679, 0, 17, 17, 1]
+
+update error on [92106679, 0, 17, 17, 1] and [None, None, None, None, 11] : <lstore.src.table.Record_For_User object at 0x10d224f40> , correct: [92106679, 0, 17, 17, 11]
+start merging process
+start merging process
+start merging process
+start merging process
+update error on [92106679, 0, 17, 17, 11] and [None, 18, None, None, None] : <lstore.src.table.Record_For_User object at 0x10d2cb700> , correct: [92106679, 18, 17, 17, 11]
+start merging process
+start merging process
+start merging process
+update error on [92106429, 4, 18, 19, 3] and [None, 18, None, None, None] : <lstore.src.table.Record_For_User object at 0x10d4ea280> , correct: [92106429, 18, 18, 19, 3]
+start merging process
+start merging processupdate error on [92106929, 2, 14, 10, 2] and [None, 1, None, None, None] : 
+<lstore.src.table.Record_For_User object at 0x10d520e50> , correct: [92106929, 1, 14, 10, 2]
+start merging processupdate error on [92107179, 2, 20, 20, 12] and [None, 0, None, None, None] : 
+<lstore.src.table.Record_For_User object at 0x10d557b80> , correct: [92107179, 0, 20, 20, 12]
+start merging process
+start merging process
+start merging process
+start merging processupdate error on [92107179, 0, 15, 11, 17] and [None, 11, None, None, None] : <lstore.src.table.Record_For_User object at 0x10d637400> , correct: [92107179, 11, 15, 11, 17]
+update error on [92107179, 11, 15, 11, 17] and [None, None, 17, None, None] : <lstore.src.table.Record_For_User object at 0x10d637340> , correct:
+ [92107179, 11, 17, 11, 17]
+update error on [92107179, 11, 17, 11, 17] and [None, None, None, 1, None] : <lstore.src.table.Record_For_User object at 0x10d66e160> , correct: [92107179, 11, 17, 1, 17]
+update error on [92107179, 11, 17, 1, 17] and [None, None, None, None, 7] : <lstore.src.table.Record_For_User object at 0x10d66e190> , correct: [92107179, 11, 17, 1, 7]
+start merging process
+start merging process
+start merging process
+start merging processupdate error on [92107179, 11, 17, 1, 7] and [None, 16, None, None, None] 
+: <lstore.src.table.Record_For_User object at 0x10d712c70> , correct: [92107179, 16, 17, 1, 7]
+start merging processupdate error on [92106429, 18, 3, 11, 20] and [None, 0, None, None, None] : <lstore.src.table.Record_For_User object at 0x10d749dc0> , correct: [92106429, 0, 3, 11, 20]
+update error on [92106429, 0, 3, 11, 20] and [None, None, 6, None, None] : <lstore.src.table.Record_For_User object at 0x10d749d00> , correct: [92106429, 0, 6, 11, 20]
+update error on [92106429, 0, 6, 11, 20] and [None, None, None, 12, None] : <lstore.src.table.Record_For_User object at 0x10d781af0> , correct:
+ [92106429, 0, 6, 12, 20]
+update error on [92106429, 0, 6, 12, 20] and [None, None, None, None, 14] : <lstore.src.table.Record_For_User object at 0x10d781b20> , correct: [92106429, 0, 6, 12, 14]
+start merging processupdate error on [92106679, 7, 7, 11, 4] and [None, None, 6, None, None] : <lstore.src.table.Record_For_User object at 0x10d781910> , correct: [92106679, 7, 6, 11, 4]
+update error on [92106679, 7, 6, 11, 4] and 
+[None, None, None, 3, None] : <lstore.src.table.Record_For_User object at 0x10d7b8670> , correct: [92106679, 7, 6, 3, 4]
+update error on [92106679, 7, 6, 3, 4] and [None, None, None, None, 8] : <lstore.src.table.Record_For_User object at 0x10d7b89d0> , correct: [92106679, 7, 6, 3, 8]
+start merging process
+start merging process
+start merging process
 Update finished
 Aggregate finished

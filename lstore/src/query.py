@@ -1,17 +1,24 @@
 import operator
+import time
 from lstore.src.table import *
 from lstore.src.page import *
 from lstore.src.config import *
 from lstore.src.buffer import *
+from lstore.src.merge import *
 from random import choice, randint, sample, seed
+
 
 class Query:
     """ Creates a Query object that can perform different queries on the specified table """
 
     def __init__(self, table):
+        self.MERGE_COUNTER = 1000
         self.table = table
         self.num_col = 0
         self.update_counter = 0
+        self.merge_manager = MergeManager()
+        self.locked = False
+        self.update_list = []
         pass
 
     """ Delete the key in the dictionary, throw an exception when user want to update the deleted record """
@@ -71,14 +78,38 @@ class Query:
     """ Update a record with specified key and columns """
 
     def update(self, key, *columns):
-        rid = self.table.key_to_rid[key]  # look up the data location
-        index = self.table.rid_to_index[rid]
-        old_data = self.find_data_by_key(key)
-        new_data = self.combine_old_data(old_data, *columns)
-        new_record = Record(new_data[0], new_data[1], new_data[2], new_data[3], new_data[4], new_data[5], new_data[6:])
-        self.table.modify(key, new_record, index)
-        self.table.write(new_record, TYPE.TAIL)
-        self.table.count_updates += 1 #adds count by 1 for merge
+        locked = self.merge_manager.locking
+        if self.merge_count_down():
+            self.locked = self.merge_manager.merge_process()
+
+        # when the lock is release
+        if not locked and len(self.update_list) != 0:
+            # appending all the modify during merge
+            self.merge_manager.join_self()
+            self.apply_update()
+            self.update_list = []
+
+        if not locked:
+            #print("not in merge")
+            rid = self.table.key_to_rid[key]  # look up the data location
+            index = self.table.rid_to_index[rid]
+            old_data = self.find_data_by_key(key)
+            new_data = self.combine_old_data(old_data, *columns)
+            new_record = Record(new_data[0], new_data[1], new_data[2],
+                                new_data[3], new_data[4], new_data[5], new_data[6:])
+            self.table.modify(key, new_record, index)
+            self.table.write(new_record, TYPE.TAIL)
+        else:
+            #print("in merge")
+            rid = self.table.key_to_rid[key]
+            index = self.table.rid_to_index[rid]
+            old_data = self.find_data_by_key(key)
+            new_data = self.combine_old_data(old_data, *columns)
+            new_record = Record(new_data[0], new_data[1], new_data[2],
+                                new_data[3], new_data[4], new_data[5], new_data[6:])
+            new_record.baserid = old_data[0]
+            self.update_list.append(new_record)
+
 
     """
     :param start_range: int         # Start of the key range to aggregate 
@@ -98,6 +129,24 @@ class Query:
                 sum += data.columns[aggregate_column_index]
         return sum
 
+    def apply_update(self):
+        for record in self.update_list:
+            rid = record.baserid
+            index = self.table.rid_to_index[rid]
+            old_data = self.find_data_by_rid(rid)
+            self.table.modify(old_data[0], record, TYPE.TAIL)
+            self.table.write(record, TYPE.TAIL)
+        return
+
+    """
+    : a function to do count down for merge process
+    """
+    def merge_count_down(self):
+        self.MERGE_COUNTER -= 1
+        if self.MERGE_COUNTER == 0:
+            self.MERGE_COUNTER = 1000
+            return True
+        return False
 
     """
     an extension to help implement above's functions
@@ -129,6 +178,18 @@ class Query:
             print("can't find key")
             exit()
         rid = self.table.key_to_rid[key]
+        page_dir = self.table.rid_to_index[rid]
+        pages_id = self.table.page_directory[page_dir.page_number]
+        pages = self.table.buffer_manager.get_pages(pages_id)
+        data = []
+        for i in range(len(pages.pages)):
+            data.append(self.read_data(pages.pages[i], page_dir.start_index, page_dir.end_index))
+        return data
+
+    def find_data_by_rid(self, rid):
+        if rid not in self.table.rid_to_index:
+            print("can't find rid")
+            exit()
         page_dir = self.table.rid_to_index[rid]
         pages_id = self.table.page_directory[page_dir.page_number]
         pages = self.table.buffer_manager.get_pages(pages_id)
