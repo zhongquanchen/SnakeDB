@@ -54,7 +54,7 @@ class Buffer:
     """
     def update(self, pages_id, pages):
         while not self.bufferpool_capacity():
-            print("size not enough")
+            # print("size not enough")
             self.flush_page(len(pages.pages))
 
         self.cur_size += len(pages.pages)

@@ -3,7 +3,7 @@ from lstore.src.table import *
 from lstore.src.page import *
 from lstore.src.config import *
 from lstore.src.buffer import *
-
+from random import choice, randint, sample, seed
 
 class Query:
     """ Creates a Query object that can perform different queries on the specified table """
@@ -65,6 +65,7 @@ class Query:
         ret_data = ret_data + data[6:]
         record = Record_For_User(ret_data[0], ret_data[1], ret_data)
         list_data =[record]
+        # print("select data ", ret_data)
         return list_data
 
     """ Update a record with specified key and columns """
@@ -78,6 +79,9 @@ class Query:
         # print("list is ", new_data)
         self.table.modify(key, new_record, index)
         self.table.write(new_record, TYPE.TAIL)
+        # print("new record ", new_data)
+        # print("old record ", old_data)
+        # print("update cols ", key, " ", columns)
 
     """
     :param start_range: int         # Start of the key range to aggregate 
@@ -160,5 +164,5 @@ class Query:
         for i in range(len(columns)-1):
             if columns[i+1] is not None:
                 filtered_data[6+i] = columns[i+1]
-        filtered_data[1] = int(old_data[1]) + self.update_counter
+        filtered_data[1] = self.update_counter #(randint(0,int(old_data[1])) + self.update_counter) % 33000
         return filtered_data
