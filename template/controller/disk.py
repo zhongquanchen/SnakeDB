@@ -20,13 +20,13 @@ class disk:
             os.makedirs('dbFile')
         
         cwd = os.getcwd() #get the current working path
-        filename = cwd + '/dbFile/' + str(pages.pages_id)
+        filename = cwd + '/dbFile/' + str(pages.pid)
 
         f = open(filename, 'wb')
         pickle.dump(pages, f)
         f.close()
         
-    def readPage(self, pages_id, num_pages):
+    def readPage(self, pages_id):
         cwd = os.getcwd() #get the current working path
         filename = cwd + '/dbFile/' + str(pages_id)
         f = open(filename, 'rb')

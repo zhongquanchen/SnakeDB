@@ -68,7 +68,6 @@ class Buffer:
         else:
             pages = self.disk.readPage(pages_id)
             self.bufferpool.update({pages_id:pages})
-
         self.replace.use_append(pages_id)
         if pages is not None:
             return pages
