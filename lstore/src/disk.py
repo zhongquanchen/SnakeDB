@@ -26,7 +26,7 @@ class disk:
         pickle.dump(pages, f)
         f.close()
         
-    def readPage(self, pages_id):
+    def readPage(self, pages_id, nameTable):
         cwd = os.getcwd() #get the current working path
         filename = cwd + '/ECS165/' + str(nameTable) + '/' + str(pages_id)
         f = open(filename, 'rb')
@@ -34,7 +34,7 @@ class disk:
         pages = pickle.load(open(filename, 'rb'))
         return pages
 
-    def deletePage(self, pages):
+    def deletePage(self, pages, nameTable):
         cwd = os.getcwd() #get the current working path
         filename = cwd + '/ECS165/' + str(nameTable) + '/' + str(pages.pages_id)
         if path.exists(filename):
