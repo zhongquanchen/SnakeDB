@@ -11,10 +11,18 @@ import threading
 class merge :
 
     def __init__(self):
-        pass
+        self.locking = False
+        self.thread = threading.Thread(target=self.merged())
 
+    # start a merge process
+    def merge_process(self):
+        self.locking = True
+        self.thread.start()
+
+    # end will join the process
     def merged(self):
-        pass
+        self.thread.join()
+        self.locking = False
 
     def tail_record_points_back(self):
         pass
