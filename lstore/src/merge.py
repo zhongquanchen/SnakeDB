@@ -1,3 +1,7 @@
+from lstore.src.config import *
+from lstore.src.query import *
+from lstore.src.table import *
+from lstore.src.page import *
 from time import *
 from lstore.src.table import *
 import threading
@@ -11,10 +15,12 @@ import threading
 
 class merge :
 
-    def __init__(self, table):
+    def __init__(self, base_page):
         self.locking = False
         self.thread = threading.Thread(target=self.merged())
-        self.table = table
+        self.old_base = base_page
+        self.new_base = base_page
+        self.locking = False
 
     # start a merge process
     def merge_process(self):
