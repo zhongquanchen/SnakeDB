@@ -7,4 +7,15 @@
      #. modify the base-merged record indirection to the new update tail record during merge
 
 class merge :
-    pass
+
+    def __init__(self):
+        pass
+
+    def merged(self):
+        pass
+
+    def tail_record_points_back(self):
+        pass
+
+
+
