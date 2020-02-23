@@ -20,35 +20,23 @@ class disk:
             os.makedirs('dbFile')
         
         cwd = os.getcwd() #get the current working path
-        filename = cwd + '/dbfile/' + str(pages.pid)
-        f = open(filename, 'wb')
+        filename = cwd + '/dbFile/' + str(pages.pages_id)
 
-        for page in pages.pages:   
-            #f.write(page.data)
-            f.writelines(page.data)
-            #f.write(os.linesep) #write a new line sign in the current working OS
+        f = open(filename, 'wb')
+        pickle.dump(pages, f)
         f.close()
         
     def readPage(self, pages_id, num_pages):
         cwd = os.getcwd() #get the current working path
-        filename = cwd + '/dbfile/' + str(pages_id)
+        filename = cwd + '/dbFile/' + str(pages_id)
         f = open(filename, 'rb')
         
-        pages = {pages, pages_id}
-        pages.pages = []
-        
-        for i in num_pages:
-            p = Page()
-            pageData = f.readline()
-            p.physical_addr = 0
-            p.num_records = 0
-            pages.pages.append(page)
-        
+        pages = pickle.load(open(filename, 'rb'))
         return pages
 
     def deletePage(self, pages):
         cwd = os.getcwd() #get the current working path
-        filename = cwd + '/dbfile/' + str(pages.pages_id)
+        filename = cwd + '/dbFile/' + str(pages.pages_id)
         if path.exists(filename):
             os.remove(filename)
         else:
