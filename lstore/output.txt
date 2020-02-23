@@ -1,3 +1,4 @@
+Creation of the directory ~/ECS165 failed
 Insert finished
 Select finished
 Update finished

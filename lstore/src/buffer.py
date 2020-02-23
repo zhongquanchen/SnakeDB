@@ -12,19 +12,11 @@ class Buffer:
         self.disk = disk(100)
         self.replace = LRU()
 
-    # search for the correspond pages in buffer, if not then search in disk
-    def fetch_page(self, page_id):
-        if page_id in self.bufferpool:
-            return self.bufferpool[page_id]
-        # find page in disk
-        pages = self.disk.readPage(page_id)
-        return page
-
     # Close function
-    def flush_page(self, pages_len):
+    def flush_page(self, pages_len, table_name):
         old_data = self.replace.pop_top()
         if old_data in self.bufferpool:
-            self.disk.writePage(self.bufferpool[old_data])
+            self.disk.writePage(self.bufferpool[old_data], table_name)
             del self.bufferpool[old_data]
             self.cur_size -= pages_len
 
@@ -52,20 +44,18 @@ class Buffer:
     """
         will detect if the buffer pool is full and write it into the buffer pool
     """
-    def update(self, pages_id, pages):
+    def update(self, pages_id, pages, table_name):
         while not self.bufferpool_capacity():
-            # print("size not enough")
-            self.flush_page(len(pages.pages))
-
+            self.flush_page(len(pages.pages), table_name)
         self.cur_size += len(pages.pages)
         self.bufferpool.update({pages_id: pages})
         self.replace.use_append(pages_id)
 
-    def get_pages(self, pages_id):
+    def get_pages(self, pages_id, table_name):
         if pages_id in self.bufferpool:
             return self.bufferpool[pages_id]
         else:
-            pages = self.disk.readPage(pages_id)
+            pages = self.disk.readPage(pages_id, table_name)
             self.bufferpool.update({pages_id:pages})
         self.replace.use_append(pages_id)
         if pages is not None:
@@ -75,15 +65,16 @@ class Buffer:
         return length(self.bufferpool)
 
 class BufferManager:
-    def __init__(self):
+    def __init__(self, table_name):
         self.buffer = Buffer()
         self.cur_counter = 0
+        self.table_name = table_name
 
     def update(self, pages_id, pages):
-        self.buffer.update(pages_id,pages)
+        self.buffer.update(pages_id,pages, self.table_name)
 
     def get_pages(self, pages_id):
-        pages = self.buffer.get_pages(pages_id)
+        pages = self.buffer.get_pages(pages_id, self.table_name)
         return pages
 
 class LRU:
@@ -97,16 +88,3 @@ class LRU:
 
     def pop_top(self):
         return self.old.pop(0)
-
-    # def access(self, page):
-    #     if page in self.buffer:
-    #         self.use_append(page)
-    #         return
-    #     if None in self.buffer:
-    #         self.buffer[self.buffer.index(None)] = page
-    #         self.use_append(page)
-    #         return
-    #     assert (len(self.old) > 0)
-    #     is_replace = self.old.pop(0)
-    #     self.buffer[self.buffer.index(is_replace)] = page
-    #     self.use_append(page)
