@@ -1,5 +1,5 @@
-from lstore.db import Database
-from lstore.query import Query
+from template.controller.db import Database
+from template.controller.query import Query
 
 from random import choice, randint, sample, seed
 

@@ -12,6 +12,7 @@ class Query:
     def __init__(self, table):
         self.table = table
         self.num_col = 0
+        self.update_counter = 0
         pass
 
     """ Delete the key in the dictionary, throw an exception when user want to update the deleted record """
@@ -57,7 +58,7 @@ class Query:
 
     """ Select a record with specified columns"""
 
-    def select(self, key, query_columns):
+    def select(self, key, column, query_columns):
         data = self.find_data_by_key(key)
         if 0 != data[5]:
             data = self.check_for_update(data[5])
@@ -75,6 +76,7 @@ class Query:
         old_data = self.find_data_by_key(key)
         new_data = self.combine_old_data(old_data, *columns)
         new_record = Record(new_data[0], new_data[1], new_data[2], new_data[3], new_data[4], new_data[5], new_data[6:])
+        # print("list is ", new_data)
         self.table.modify(key, new_record, index)
         self.table.write(new_record, TYPE.TAIL)
 
@@ -92,7 +94,7 @@ class Query:
         on_add = False
         for i in range(end_range - start_range+1):
             if start_range + i in self.table.key_to_rid:
-                data = self.select(start_range + i, [1, 1, 1, 1, 1])[0]
+                data = self.select(start_range + i, 0, [1, 1, 1, 1, 1])[0]
                 sum += data.columns[aggregate_column_index]
         return sum
 
@@ -149,6 +151,7 @@ class Query:
         return int(ret_data)
 
     def combine_old_data(self, old_data, *columns):
+        self.update_counter += 1
         if old_data[5] != 0:
             old_data = self.check_for_update(old_data[5])
         filtered_data = old_data
@@ -158,5 +161,5 @@ class Query:
         for i in range(len(columns)-1):
             if columns[i+1] is not None:
                 filtered_data[6+i] = columns[i+1]
-        filtered_data[1] = int(old_data[1]*10) + 1
+        filtered_data[1] = int(old_data[1]) + self.update_counter
         return filtered_data
