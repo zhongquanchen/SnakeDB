@@ -1,30 +1,24 @@
 from template.tools.config import *
 from template.model.page import *
 from template.controller.disk import *
-from template.controller.replace import *
 
-class buffer:
+
+class Buffer:
     def __init__(self):
         # buffer pages
         self.bufferpool = {}
-        self.buffersize = BUFFERPOOL_SIZE
+        self.buffersize = BUFFER_SIZE
         self.cur_size = 0
         self.disk = disk(100)
         self.replace = LRU()
 
+    # search for the correspond pages in buffer, if not then search in disk
     def fetch_page(self, page_id):
         if page_id in self.bufferpool:
             return self.bufferpool[page_id]
-
         # find page in disk
-        page = self.disk.readPage(page_id)
+        pages = self.disk.readPage(page_id)
         return page
-        # for Pages in self.buffer_pool:
-        #     if Pages.id == page_id:
-        #         return Pages
-        # page = self.replace.evict()
-        # if Page.is_dirty():
-        #     self.disk.write_page(page)
 
     # Close function
     def flush_page(self, pages_len):
@@ -35,12 +29,12 @@ class buffer:
             self.cur_size -= pages_len
 
     def delete_page(self, page_id):
-        for pages in self.buffer:
+        for pages in self.bufferpool:
             if pages.id == page_id:
                 self.disk.delete_page(pages)
 
     def unpinning_page(self, page_id, is_dirty):
-        for Pages in self.bufferpool:
+        for Pages in self.buffer_pool:
             if Pages.index == page_id:
                 Pages.decrease_pin()
                 if is_dirty:
@@ -51,7 +45,7 @@ class buffer:
         return False
 
     def bufferpool_capacity(self):
-        if self.cur_size+SPACE_LEFT > BUFFERPOOL_SIZE:
+        if self.cur_size+SPACE_LEFT > BUFFER_SIZE:
             return False
         return True
 
@@ -73,14 +67,13 @@ class buffer:
         else:
             pages = self.disk.readPage(pages_id)
             self.bufferpool.update({pages_id:pages})
-
         self.replace.use_append(pages_id)
         if pages is not None:
             return pages
 
 class BufferManager:
     def __init__(self):
-        self.buffer = buffer()
+        self.buffer = Buffer()
         self.cur_counter = 0
 
     def update(self, pages_id, pages):
@@ -89,7 +82,6 @@ class BufferManager:
     def get_pages(self, pages_id):
         pages = self.buffer.get_pages(pages_id)
         return pages
-
 
 class LRU:
     def __init__(self):

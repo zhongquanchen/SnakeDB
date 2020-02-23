@@ -1,10 +1,11 @@
-from template.model.page import *
-from template.tools.config import *
 from template.model.index import *
 from template.controller.buffer import *
+
 """
     :Record is used as a format to write into the page, [this is for admin use]
 """
+
+
 class Record:
     def __init__(self, key, rid, indirect, schema_encode, now, columns, datas):
         self.record = {}
@@ -22,21 +23,22 @@ class Record:
 """
     :Record is used as a format to write into the page, [this is for user] *block some data that shouldn't be seem
 """
+
+
 class Record_For_User:
     def __init__(self, key, rid, columns):
         self.rid = rid
         self.key = key
         self.columns = columns
 
+
 """
     :Table will used to store page directories, and all the ids, rid, columns, etc.
 """
+
+
 class Table:
-    """
-    :param name: string         #Table name
-    :param num_columns: int     #Number of Columns: all columns are integer
-    :param key: int             #Index of table key in columns
-    """
+
     def __init__(self, name, num_columns, key):
         self.base_page = BASE_PAGE_NUM
         self.tail_page = TAIL_PAGE_NUM
@@ -56,8 +58,8 @@ class Table:
         self.rid_to_index = {}
         # current page index
         self.current_page = 0
+        # all the modify page will store in buffer
         self.buffer_manager = BufferManager()
-        pass
 
     def __merge(self):
         pass
@@ -67,6 +69,7 @@ class Table:
     :param name: modify_page. detect the action is to write in base page or in tail page
                               by default the action is writing in base page
     """
+
     def write(self, record, modify_page=TYPE.BASE):
         record_array = self.record_to_array(record)
         # update key in database & look_for_page will check for the pages directory and update if needed
@@ -78,10 +81,9 @@ class Table:
         if modify_page == TYPE.BASE:
             self.key_to_rid.update({record.key: record.rid})
             self.rid_to_index.update({record.rid: Index(self.current_page, start_index, end_index)})
-        else :
+        else:
             self.tail_rid_lookup.update({record.key: record.rid})
             self.tail_index_lookup.update({record.rid: Index(self.tail_page, start_index, end_index)})
-
 
     """
         format of array 
@@ -93,6 +95,7 @@ class Table:
         # self.indirect = indirect
         # self.datas = datas
     """
+
     def record_to_array(self, record):
         record_array = []
         record_array.append(record.key)
@@ -108,8 +111,9 @@ class Table:
     def look_for_pages(self, modify_page=TYPE.BASE):
         if TYPE.BASE == modify_page:
             if len(self.page_directory) != 0:
-                pages = self.page_directory[self.current_page]
-            if len(self.page_directory) == 0 or pages[0].has_capacity() == False:
+                pages_id = self.page_directory[self.current_page]
+                pages = self.buffer_manager.get_pages(pages_id)
+            if len(self.page_directory) == 0 or pages.pages[0].has_capacity() == False:
                 pages = []
                 for i in range(self.num_columns + INTER_DATA_COL):
                     page = Page()
@@ -118,12 +122,14 @@ class Table:
                 ret_pages = Pages(self.current_page, pages)
                 pages_id = ret_pages.pid
                 self.buffer_manager.update(pages_id, ret_pages)
-            return self.page_directory[self.current_page]
+                self.page_directory.update({self.current_page: pages_id})
+            return self.buffer_manager.get_pages(pages_id)
         else:
             # if the dictionary is empty just create one page
             if self.tail_page in self.page_directory:
-                pages = self.page_directory[self.tail_page]
-            if len(self.page_directory) == 0 or pages.pages[0].has_capacity() == False:
+                pages_id = self.page_directory[self.tail_page]
+                pages = self.buffer_manager.get_pages(pages_id)
+            if self.tail_page not in self.page_directory or pages.pages[0].has_capacity() == False:
                 pages = []
                 for i in range(self.num_columns + INTER_DATA_COL):
                     page = Page()
@@ -132,16 +138,19 @@ class Table:
                 ret_pages = Pages(self.tail_page, pages)
                 pages_id = ret_pages.pid
                 self.buffer_manager.update(pages_id, ret_pages)
-            return self.page_directory[self.tail_page]
+                self.page_directory.update({self.tail_page: pages_id})
+            return self.buffer_manager.get_pages(pages_id)
 
     """
     :param name: record. contain the data for each rows
     :param name: index. (actually location in the bytearray) used to write into the page
     """
+
     def modify(self, key, new_record, index):
         rid = self.key_to_rid[key]
         index = self.rid_to_index[rid]
-        pages = self.page_directory[index.page_number]
+        pages_id = self.page_directory[index.page_number]
+        pages = self.buffer_manager.get_pages(pages_id)
         pages.pages[5].modify(index, new_record.rid)
 
     """
@@ -149,16 +158,16 @@ class Table:
         if the indirection of that data is point to other location
         :param name: page_data. a row of data, [namely: record]
     """
+
     def check_for_update(self, page_data):
         list_data = translate_data(page_data)
         if list_data[2] != 0:
             index = self.tail_index_lookup[list_data[2]]
             if list_data[2] not in self.tail_index_lookup:
                 print("can't find rid in tail page : def check_for_update()")
-            tail_page = self.page_directory[index.page_number]
-            tail_page_data = translate_data(tail_page.data[index.start_index: index.end_index+DATA_SIZE])
+            tail_pages_id = self.page_directory[index.page_number]
+            tail_page = self.buffer_manager.get_pages(tail_pages_id)
+            tail_page_data = translate_data(tail_page.data[index.start_index: index.end_index + DATA_SIZE])
             return tail_page_data
         else:
             return list_data
-
-
