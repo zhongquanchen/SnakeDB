@@ -15,11 +15,12 @@ import threading
 
 class merge :
 
-    def __init__(self, base_page):
+    def __init__(self, base_page, table):
         self.locking = False
         self.thread = threading.Thread(target=self.merged())
         self.old_base = base_page
         self.new_base = base_page
+        self.table = table
         self.locking = False
 
     # start a merge process
@@ -38,6 +39,11 @@ class merge :
     def run_all_base_page(self):
         for key in self.table.key_to_rid:
             print("all the keys ", key, " rids: ", self.table.key_to_rid[key])
+        index = self.table.rid_to_index[key]
+        pid = self.table.page_directory[index.page_number] # pid : pages id
+        pages = self.table.buffer_manager.get_pages(pid)
+        copy_page = pages.copy()
+        return copy_page
 
     # copy the base page
     def copy_base_page(self, old_page, new_page):

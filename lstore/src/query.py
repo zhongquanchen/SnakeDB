@@ -76,12 +76,8 @@ class Query:
         old_data = self.find_data_by_key(key)
         new_data = self.combine_old_data(old_data, *columns)
         new_record = Record(new_data[0], new_data[1], new_data[2], new_data[3], new_data[4], new_data[5], new_data[6:])
-        # print("list is ", new_data)
         self.table.modify(key, new_record, index)
         self.table.write(new_record, TYPE.TAIL)
-        # print("new record ", new_data)
-        # print("old record ", old_data)
-        # print("update cols ", key, " ", columns)
         self.table.count_updates += 1 #adds count by 1 for merge
 
     """
