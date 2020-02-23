@@ -22,6 +22,7 @@ class merge :
         self.new_base = base_page
         self.table = table
         self.locking = False
+        self.copy_list = []
 
     # start a merge process
     def merge_process(self):
@@ -39,14 +40,17 @@ class merge :
     def run_all_base_page(self):
         for key in self.table.key_to_rid:
             print("all the keys ", key, " rids: ", self.table.key_to_rid[key])
-        index = self.table.rid_to_index[key]
-        pid = self.table.page_directory[index.page_number] # pid : pages id
-        pages = self.table.buffer_manager.get_pages(pid)
-        copy_page = pages.copy()
-        return copy_page
 
     # copy the base page
-    def copy_base_page(self, old_page, new_page):
-        merge.run_all_base_page(old_page);
-        new_page = old_page
-        return new_page
+    def copy_base_page(self, key):
+        for key in self.table.key_to_rid:
+            # print("all the keys ", key, " rids: ", self.table.key_to_rid[key])
+            index = self.table.rid_to_index[key]
+            pid = self.table.page_directory[index.page_number]  # pid : pages id
+            pages = self.table.buffer_manager.get_pages(pid)
+            if pages in self.table.base_page:
+                print("Pages are in the table already")
+            else:
+                self.copy_list.append(pages)
+                copy_page = self.copy_list.copy()
+        return copy_page
