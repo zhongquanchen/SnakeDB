@@ -2,6 +2,9 @@ from lstore.src.config import *
 from lstore.src.query import *
 from lstore.src.table import *
 from lstore.src.page import *
+from time import *
+import threading
+
 # 1. have the base page and tail merge together
      #. need to run in background
      #. all the base page will copy to a new buffer pool
@@ -11,20 +14,19 @@ from lstore.src.page import *
 
 class merge :
 
-    def __init__(self, base_page):
-        self.new_base = base_page
-        self.old_base = base_page
-        pass
+    def __init__(self):
+        self.locking = False
+        self.thread = threading.Thread(target=self.merged())
 
-    def update_tail_to_new(self):
-        for i in range(self.old_base)
-            ###todo
+    # start a merge process
+    def merge_process(self):
+        self.locking = True
+        self.thread.start()
 
+    # end will join the process
     def merged(self):
-        pass
+        self.thread.join()
+        self.locking = False
 
     def tail_record_points_back(self):
         pass
-
-
-
