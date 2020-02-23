@@ -16,16 +16,17 @@ class disk:
 # pages : class Pages {pages, pages_id}
     def writePage(self, pages):
         self.page_record.update({pages.id:pages.pages[0].num_records})
-        if not os.path.exists('dbFile')
+        if not os.path.exists('dbFile'):
             os.makedirs('dbFile')
         
         cwd = os.getcwd() #get the current working path
-        filename = cwd + '/dbfile/' + str(pages.pages_id)
+        filename = cwd + '/dbfile/' + str(pages.pid)
         f = open(filename, 'wb')
 
         for page in pages.pages:   
-            f.write(page.data)
-            f.write(os.linesep) #write a new line sign in the current working OS
+            #f.write(page.data)
+            f.writelines(page.data)
+            #f.write(os.linesep) #write a new line sign in the current working OS
         f.close()
         
     def readPage(self, pages_id, num_pages):
