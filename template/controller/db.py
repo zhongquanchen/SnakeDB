@@ -1,7 +1,8 @@
 from template.controller.table import Table
 from template.tools.config import *
 from template.controller.buffer import  *
-
+import os
+ 
 class Database():
 
     def __init__(self):
@@ -9,7 +10,12 @@ class Database():
         pass
 
     def open(self, path):
-        #path = table file location
+        try:
+            os.mkdir(path)
+        except OSError:
+            print("Creation of the directory %s failed" % path)
+        else:
+            print("Successfully created the directory %s " % path)
 
         self.maxBufferSize = BUFFER_SIZE
         self.currentBufferSize = 0
