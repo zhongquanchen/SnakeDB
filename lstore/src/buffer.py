@@ -71,6 +71,9 @@ class Buffer:
         if pages is not None:
             return pages
 
+    def size(self):
+        return length(self.bufferpool)
+
 class BufferManager:
     def __init__(self):
         self.buffer = Buffer()
