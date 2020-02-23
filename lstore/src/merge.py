@@ -17,7 +17,7 @@ class merge :
         pass
 
     def update_tail_to_new(self):
-        for i in range(old_base)
+        for i in range(self.old_base)
             ###todo
 
     def merged(self):
