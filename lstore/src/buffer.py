@@ -62,7 +62,7 @@ class Buffer:
             return pages
 
     def size(self):
-        return length(self.bufferpool)
+        return len(self.bufferpool)
 
 class BufferManager:
     def __init__(self, table_name):
