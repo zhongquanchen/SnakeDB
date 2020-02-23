@@ -82,6 +82,7 @@ class Query:
         # print("new record ", new_data)
         # print("old record ", old_data)
         # print("update cols ", key, " ", columns)
+        self.table.count_updates += 1 #adds count by 1 for merge
 
     """
     :param start_range: int         # Start of the key range to aggregate 

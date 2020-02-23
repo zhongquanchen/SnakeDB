@@ -60,6 +60,8 @@ class Table:
         self.current_page = 0
         # all the modify page will store in buffer
         self.buffer_manager = BufferManager(self.name)
+        # tracks number of update operations for merge
+        self.count_updates = 0
 
     def __merge(self):
         pass
