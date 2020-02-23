@@ -1,7 +1,6 @@
 from template.tools.config import *
 from template.model.page import *
 from template.controller.disk import *
-from template.controller.LRU import *
 
 
 class Buffer:
@@ -71,7 +70,6 @@ class Buffer:
         self.replace.use_append(pages_id)
         if pages is not None:
             return pages
-
 
 class BufferManager:
 

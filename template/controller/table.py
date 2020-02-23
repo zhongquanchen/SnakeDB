@@ -21,7 +21,6 @@ class Record:
         self.indirect = indirect
         self.datas = datas
 
-
 """
     :Record is used as a format to write into the page, [this is for user] *block some data that shouldn't be seem
 """
