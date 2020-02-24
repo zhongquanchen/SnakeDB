@@ -36,7 +36,7 @@ class disk:
 
     def deletePage(self, pages, nameTable):
         cwd = os.getcwd() #get the current working path
-        filename = cwd + '/ECS165/' + str(nameTable) + '/' + str(pages.pages_id)
+        filename = cwd + '/ECS165/' + str(nameTable) + '/' + str(pages.pid)
         if path.exists(filename):
             os.remove(filename)
         else:
