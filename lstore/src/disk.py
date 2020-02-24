@@ -1,4 +1,4 @@
-# from template.controller.table import Table
+from lstore.src.table import *
 from turtledemo.penrose import f
 
 
