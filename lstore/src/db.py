@@ -1,4 +1,5 @@
 from lstore.src.table import Table
+from lstore.src.disk import *
 from lstore.src.config import *
 from lstore.src.buffer import  *
 
@@ -33,6 +34,7 @@ class Database():
     """
     def create_table(self, name, num_columns, key):
         table = Table(name, num_columns, key)
+        disk.writeTable(table)
         return table
 
     """
