@@ -1,4 +1,4 @@
-# from template.controller.table import Table
+from lstore.src.table import *
 from turtledemo.penrose import f
 
 
@@ -36,7 +36,7 @@ class disk:
 
     def deletePage(self, pages, nameTable):
         cwd = os.getcwd() #get the current working path
-        filename = cwd + '/ECS165/' + str(nameTable) + '/' + str(pages.pages_id)
+        filename = cwd + '/ECS165/' + str(nameTable) + '/' + str(pages.pid)
         if path.exists(filename):
             os.remove(filename)
         else:
@@ -49,13 +49,13 @@ class disk:
         f.close()
 
     def readTable(self, tableName):
-        filename = cwd + '/ECS165/' + str(table.name) + '/' + str(table.name)
+        filename = cwd + '/ECS165/' + str(tableName) + '/' + str(tableName)
         table = pickle.load(open(filename, 'rb'))
         f.close()
         return table
 
-    def deleteTable(self, table):
-        filename = cwd + '/ECS165/' + str(table.name) + '/' + str(table.name)
+    def deleteTable(self, tableName):
+        filename = cwd + '/ECS165/' + str(tableName) + '/' + str(tableName)
         if path.exists(filename):
             os.remove(filename)
         else:

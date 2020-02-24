@@ -1,6 +1,10 @@
 from lstore.src.table import Table
+from lstore.src.disk import *
 from lstore.src.config import *
 from lstore.src.buffer import  *
+import os
+from os import path
+import pickle
 
 class Database():
 
@@ -33,12 +37,18 @@ class Database():
     """
     def create_table(self, name, num_columns, key):
         table = Table(name, num_columns, key)
+        cwd = os.getcwd()
+        filename = cwd + '/ECS165/' + str(table.name) + '/' + str(table.name)
+        with open(filename, 'wb') as f:
+            pickle.dump(table, f)
+        f.close()
         return table
 
     """
     # Deletes the specified table
     """
     def drop_table(self, name):
+        disk.deleteTable(name)
         pass
 
     """
