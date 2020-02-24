@@ -7,19 +7,17 @@ from lstore.src.buffer import *
 from lstore.src.merge import *
 from random import choice, randint, sample, seed
 
-
 class Query:
     """ Creates a Query object that can perform different queries on the specified table """
 
     def __init__(self, table):
+        self.tester = 1000
         self.MERGE_COUNTER = 1000
         self.table = table
         self.num_col = 0
         self.update_counter = 0
-        self.merge_manager = MergeManager()
         self.locked = False
         self.update_list = []
-        pass
 
     """ Delete the key in the dictionary, throw an exception when user want to update the deleted record """
 
@@ -53,7 +51,7 @@ class Query:
     def insert(self, *columns):
         key = columns[0]
         cur_time = int(time.time())
-        rid = key % 100000000 # we use rid as the current, so when ever it create, it is unique
+        rid = key % 100000000  # we use rid as the current, so when ever it create, it is unique
         indirect = 0
         schema_encoding = '0' * self.table.num_columns
         record = Record(key, rid, indirect, schema_encoding,
@@ -70,72 +68,93 @@ class Query:
             data = self.check_for_update(data[5])
         ret_data = [data[0]]
         ret_data = ret_data + data[6:]
-        record = Record_For_User(ret_data[0], ret_data[1], ret_data)
-        list_data =[record]
-        # print("select data ", ret_data)
-        return list_data
+        for record in self.update_list:
+            if record.key == key:
+                ret_data = [record.key]
+                ret_data = ret_data + record.datas
+                print("found keys in update list select func ", ret_data)
+                self.update_list = []
+        ret_record = Record_For_User(ret_data[0], ret_data[1], ret_data)
+        list_data_a = [ret_record]
+        print("wtf ", list_data_a[0].key,"",list_data_a[0].columns)
+        return list_data_a
 
     """ Update a record with specified key and columns """
 
     def update(self, key, *columns):
-        locked = self.merge_manager.locking
-        if self.merge_count_down():
-            self.locked = self.merge_manager.merge_process()
+        rid = self.table.key_to_rid[key]
+        index = self.table.rid_to_index[rid]
+        old_data = self.find_data_by_key(key)
 
-        # when the lock is release
-        if not locked and len(self.update_list) != 0:
-            # appending all the modify during merge
-            self.merge_manager.join_self()
-            self.apply_update()
-            self.update_list = []
+        if self.locked:
+            self.merge_start()
 
-        if not locked:
-            #print("not in merge")
-            rid = self.table.key_to_rid[key]  # look up the data location
-            index = self.table.rid_to_index[rid]
-            old_data = self.find_data_by_key(key)
+        if not self.locked:
+            print("not in merge")
             new_data = self.combine_old_data(old_data, *columns)
             new_record = Record(new_data[0], new_data[1], new_data[2],
                                 new_data[3], new_data[4], new_data[5], new_data[6:])
             self.table.modify(key, new_record, index)
             self.table.write(new_record, TYPE.TAIL)
         else:
-            #print("in merge")
-            rid = self.table.key_to_rid[key]
-            index = self.table.rid_to_index[rid]
-            old_data = self.find_data_by_key(key)
             new_data = self.combine_old_data(old_data, *columns)
             new_record = Record(new_data[0], new_data[1], new_data[2],
                                 new_data[3], new_data[4], new_data[5], new_data[6:])
-            new_record.baserid = old_data[0]
+            print("yes")
+            print("update record ", new_record.key, "", new_record.datas)
+            new_record.basekey = old_data[0]
             self.update_list.append(new_record)
+            self.table.write(new_record, TYPE.TAIL)
+
+        if self.locked:
+            self.thread.join()
+            print("two thread joined")
+            self.locked = False
+            # self.apply_update()
+            # self.update_list = []
+            self.MERGE_COUNTER = 1000
+
+        self.locked = self.merge_count_down()
 
 
-    """
-    :param start_range: int         # Start of the key range to aggregate 
-    :param end_range: int           # End of the key range to aggregate 
-    :param aggregate_columns: int  # Index of desired column to aggregate
-    """
-    def sum(self, start_range, end_range, aggregate_column_index):
-        # sort the key in dictionary
-        # sum them up by two range
-        sum = 0
-        sorted_keys = sorted(
-            self.table.key_to_rid.items(), key=operator.itemgetter(0))
-        on_add = False
-        for i in range(end_range - start_range+1):
-            if start_range + i in self.table.key_to_rid:
-                data = self.select(start_range + i, 0, [1, 1, 1, 1, 1])[0]
-                sum += data.columns[aggregate_column_index]
-        return sum
+    def merge_process(self):
+        for key in self.table.key_to_rid:
+            old_data = self.find_data_by_key(key)
+            record = Record(old_data[0], old_data[1], old_data[2],
+                                old_data[3], old_data[4], old_data[5], old_data[6:])
+            self.table.modify_record(record.key, record)
+
+
+    def merge_start(self):
+        self.locked = True
+        self.thread = threading.Thread(target=self.merge_process)
+        self.thread.start()
+
+    def merge_tester(self):
+        print()
+        print()
 
     def apply_update(self):
         for record in self.update_list:
-            rid = record.baserid
+            rid = self.table.key_to_rid[record.key]
             index = self.table.rid_to_index[rid]
-            old_data = self.find_data_by_rid(rid)
-            self.table.modify(old_data[0], record, TYPE.TAIL)
-            self.table.write(record, TYPE.TAIL)
+            old_data = self.find_data_by_key(record.key)
+            # print("old data before modify, ", old_data)
+            self.table.modify(record.key, record, index)
+            old_data = self.find_data_by_key(record.key)
+            # print("old data after modify, ", old_data)
+            indir_data = self.check_for_update(old_data[5])
+            # print("indir data, ", indir_data)
+
+
+        # for record in self.update_list:
+        #     rid = record.baserid
+        #     index = self.table.rid_to_index[rid]
+        #     old_data = self.find_data_by_key(rid)
+        #     print("find old data ", old_data)
+        #     print("base rid ", record.baserid)
+        #     print("record is ", record.key, "",record.datas)
+        #     self.table.modify(old_data[0], record, index)
         return
 
     """
@@ -143,10 +162,29 @@ class Query:
     """
     def merge_count_down(self):
         self.MERGE_COUNTER -= 1
-        if self.MERGE_COUNTER == 0:
-            self.MERGE_COUNTER = 1000
+        if self.MERGE_COUNTER <= 0:
             return True
         return False
+
+    """
+    :param start_range: int         # Start of the key range to aggregate 
+    :param end_range: int           # End of the key range to aggregate 
+    :param aggregate_columns: int  # Index of desired column to aggregate
+    """
+
+    def sum(self, start_range, end_range, aggregate_column_index):
+        # sort the key in dictionary
+        # sum them up by two range
+        sum = 0
+        sorted_keys = sorted(
+            self.table.key_to_rid.items(), key=operator.itemgetter(0))
+        on_add = False
+        for i in range(end_range - start_range + 1):
+            if start_range + i in self.table.key_to_rid:
+                data = self.select(start_range + i, 0, [1, 1, 1, 1, 1])[0]
+                sum += data.columns[aggregate_column_index]
+        return sum
+
 
     """
     an extension to help implement above's functions
@@ -215,12 +253,30 @@ class Query:
         self.update_counter += 1
         if old_data[5] != 0:
             old_data = self.check_for_update(old_data[5])
+        old_data = self.check_in_update_list(old_data)
+        print("old_data is ", old_data)
+        print("columns is ", columns)
         filtered_data = old_data
         if columns[0] is not None:
             filtered_data[0] = columns[0]
 
-        for i in range(len(columns)-1):
-            if columns[i+1] is not None:
-                filtered_data[6+i] = columns[i+1]
-        filtered_data[1] = self.update_counter #(randint(0,int(old_data[1])) + self.update_counter) % 33000
+        for i in range(len(columns) - 1):
+            if columns[i + 1] is not None:
+                filtered_data[6 + i] = columns[i + 1]
+        filtered_data[1] = self.update_counter  # (randint(0,int(old_data[1])) + self.update_counter) % 33000
+        print("filererd data is ", filtered_data)
         return filtered_data
+
+    def check_in_update_list(self, old_data):
+        # (self, key, rid, indirect, schema_encode, now, columns, datas):
+        if len(self.update_list) == 0:
+            return old_data
+        else:
+            new_data = old_data
+            for record in self.update_list:
+                if old_data[0] == record.key:
+                    new_data = [record.key, record.rid, record.indirect, record.schema, record.time, record.columns]
+                    new_data = new_data + record.datas
+            return new_data
+
+

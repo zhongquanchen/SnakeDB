@@ -10,7 +10,7 @@ class Record:
     def __init__(self, key, rid, indirect, schema_encode, now, columns, datas):
         self.record = {}
         self.create_record(rid, key, columns, schema_encode, now, indirect, datas)
-        self.baserid = 0
+        self.basekey = 0
 
     def create_record(self, rid, key, columns, schema_encode, now, indirect, datas):
         self.key = key
@@ -41,7 +41,8 @@ class Record_For_User:
 class Table:
 
     def __init__(self, name, num_columns, key):
-        self.base_page = BASE_PAGE_NUM
+        # current page index
+        self.current_page = 0
         self.tail_page = TAIL_PAGE_NUM
 
         self.name = name
@@ -52,13 +53,10 @@ class Table:
 
         self.tail_rid_lookup = {}
         self.tail_index_lookup = {}
-
         # use to match key with rid
         self.key_to_rid = {}
         # use to match the rid and the index, data location
         self.rid_to_index = {}
-        # current page index
-        self.current_page = 0
         # all the modify page will store in buffer
         self.buffer_manager = BufferManager(self.name)
         # tracks number of update operations for merge
@@ -155,6 +153,34 @@ class Table:
         pages_id = self.page_directory[index.page_number]
         pages = self.buffer_manager.get_pages(pages_id)
         pages.pages[5].modify(index, new_record.rid)
+
+    """
+        format of array 
+        # self.key = key
+        # self.rid = rid
+        # self.columns = columns
+        # self.schema = schema_encode
+        # self.time = now
+        # self.indirect = indirect
+        # self.datas = datas
+    """
+    def modify_record(self, key, new_record):
+        rid = self.key_to_rid[key]
+        index = self.rid_to_index[rid]
+        pages_id = self.page_directory[index.page_number]
+        pages = self.buffer_manager.get_pages(pages_id)
+
+        pages.pages[0].modify(index, new_record.key)
+        # pages.pages[1].modify(index, new_record.rid) not changing base page rid when merged
+        # pages.pages[2].modify(index, new_record.columns) not changing base page columns
+        pages.pages[3].modify(index, new_record.schema)
+        pages.pages[4].modify(index, new_record.time)
+        pages.pages[5].modify(index, 0)
+        i = 0
+        for page in pages.pages[6:]:
+            page.modify(index, new_record.datas[i])
+            i += 1
+
 
     """
         This function will check for the row of data to see 

@@ -46,8 +46,8 @@ for _ in range(10):
                     error = True
             if error:
                 print('update error on', original, 'and', updated_columns, ':', record, ', correct:', records[key])
-            # else:
-            #     print('update on', original, 'and', updated_columns, ':', record)
+            else:
+                print('update on', original, 'and', updated_columns, ':', record)
             updated_columns[i] = None
 print("Update finished")
 
