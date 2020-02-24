@@ -20,10 +20,10 @@ class Buffer:
             del self.bufferpool[old_data]
             self.cur_size -= pages_len
 
-    def delete_page(self, page_id):
+    def delete_page(self, page_id, table_name):
         for pages in self.bufferpool:
             if pages.id == page_id:
-                self.disk.delete_page(pages)
+                self.disk.delete_page(pages, table_name)
 
     def unpinning_page(self, page_id, is_dirty):
         for Pages in self.buffer_pool:
