@@ -41,6 +41,7 @@ class Database():
     # Deletes the specified table
     """
     def drop_table(self, name):
+        disk.deleteTable(name)
         pass
 
     """

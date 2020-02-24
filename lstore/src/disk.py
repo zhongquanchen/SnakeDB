@@ -49,13 +49,13 @@ class disk:
         f.close()
 
     def readTable(self, tableName):
-        filename = cwd + '/ECS165/' + str(table.name) + '/' + str(table.name)
+        filename = cwd + '/ECS165/' + str(tableName) + '/' + str(tableName)
         table = pickle.load(open(filename, 'rb'))
         f.close()
         return table
 
-    def deleteTable(self, table):
-        filename = cwd + '/ECS165/' + str(table.name) + '/' + str(table.name)
+    def deleteTable(self, tableName):
+        filename = cwd + '/ECS165/' + str(tableName) + '/' + str(tableName)
         if path.exists(filename):
             os.remove(filename)
         else:
