@@ -40,14 +40,16 @@ for _ in range(10):
             records[key][i] = value
             query.update(key, *updated_columns)
             record = query.select(key, 0, [1, 1, 1, 1, 1])[0]
+            # print("record in tester is ", record.key,"",record.columns)
+            # print("records in tester is ", records[key])
             error = False
             for j, column in enumerate(record.columns):
                 if column != records[key][j]:
                     error = True
             if error:
                 print('update error on', original, 'and', updated_columns, ':', record, ', correct:', records[key])
-            else:
-                print('update on', original, 'and', updated_columns, ':', record)
+            # else:
+            #     print('update on', original, 'and', updated_columns, ':', record)
             updated_columns[i] = None
 print("Update finished")
 

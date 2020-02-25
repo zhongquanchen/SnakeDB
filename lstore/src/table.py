@@ -4,8 +4,6 @@ from lstore.src.buffer import *
 """
     :Record is used as a format to write into the page, [this is for admin use]
 """
-
-
 class Record:
     def __init__(self, key, rid, indirect, schema_encode, now, columns, datas):
         self.record = {}
@@ -25,7 +23,6 @@ class Record:
     :Record is used as a format to write into the page, [this is for user] *block some data that shouldn't be seem
 """
 
-
 class Record_For_User:
     def __init__(self, key, rid, columns):
         self.rid = rid
@@ -36,7 +33,6 @@ class Record_For_User:
 """
     :Table will used to store page directories, and all the ids, rid, columns, etc.
 """
-
 
 class Table:
 
@@ -70,6 +66,15 @@ class Table:
     :param name: modify_page. detect the action is to write in base page or in tail page
                               by default the action is writing in base page
     """
+
+    def write_page(self, record, pages, current_page):
+        record_array = self.record_to_array(record)
+        start_index = pages.pages[0].physical_addr
+        for i in range(len(pages.pages)):
+            pages.pages[i].write(record_array[i])
+        end_index = pages.pages[0].physical_addr
+        self.key_to_rid.update({record.key: record.rid})
+        self.rid_to_index.update({record.rid: Index(current_page, start_index, end_index)})
 
     def write(self, record, modify_page=TYPE.BASE):
         record_array = self.record_to_array(record)
@@ -171,8 +176,6 @@ class Table:
         pages = self.buffer_manager.get_pages(pages_id)
 
         pages.pages[0].modify(index, new_record.key)
-        # pages.pages[1].modify(index, new_record.rid) not changing base page rid when merged
-        # pages.pages[2].modify(index, new_record.columns) not changing base page columns
         pages.pages[3].modify(index, new_record.schema)
         pages.pages[4].modify(index, new_record.time)
         pages.pages[5].modify(index, 0)
@@ -200,3 +203,13 @@ class Table:
             return tail_page_data
         else:
             return list_data
+
+    def create_new_pages(self):
+        pages = []
+        for i in range(self.num_columns+INTER_DATA_COL):
+            page = Page()
+            pages.append(page)
+
+        ret_pages = Pages()
+        ret_pages.pages = pages
+        return ret_pages
