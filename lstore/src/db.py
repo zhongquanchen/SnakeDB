@@ -23,7 +23,7 @@ class Database():
 
     def close(self):
         for table in self.tables:
-            self.disk.writeTable(table.name)
+            self.disk.writeTable(table)
 
     """
     # Creates a new table
@@ -40,6 +40,7 @@ class Database():
         filename = cwd + '/ECS165/' + str(table.name) + '/' + str(table.name)
         with open(filename, 'wb') as f:
             pickle.dump(table, f)
+        self.tables.append(table)
         return table
 
     """
@@ -53,5 +54,5 @@ class Database():
     # Returns table with the passed name
     """
     def get_table(self, name):
-        self.tables = self.disk.readTable(name)
-        return self.tables
+        table = self.disk.readTable(name)
+        return table
