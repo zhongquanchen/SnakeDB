@@ -22,9 +22,8 @@ class Database():
 
 
     def close(self):
-        pass
-        # for table in self.tables:
-        #     self.disk.writeTable(table.name)
+        for table in self.tables:
+            self.disk.writeTable(table.name)
 
     """
     # Creates a new table
