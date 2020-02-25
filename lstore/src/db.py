@@ -51,5 +51,5 @@ class Database():
     # Returns table with the passed name
     """
     def get_table(self, name):
-        return self.tables
+        return disk.readTable(self, name)
         pass
