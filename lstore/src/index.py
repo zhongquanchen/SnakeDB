@@ -14,24 +14,3 @@ class Index:
         self.page_number = indexes[0]
         self.start_index = indexes[1]
         self.end_index = indexes[2]
-
-    """
-    # returns the location of all records with the given value
-    """
-
-    def locate(self, value):
-        pass
-
-    """
-    # optional: Create index on specific column
-    """
-
-    def create_index(self, table, column_number):
-        pass
-
-    """
-    # optional: Drop index of specific column
-    """
-
-    def drop_index(self, table, column_number):
-        pass
