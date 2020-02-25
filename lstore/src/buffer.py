@@ -1,4 +1,5 @@
 from lstore.src.config import *
+from lstore.src.disk import disk
 from lstore.src.page import *
 from lstore.src.disk import *
 

@@ -8,8 +8,7 @@ import pickle
 
 
 class disk:
-    def __init__(self, page_size):
-        self.page_size = page_size
+    def __init__(self):
         self.page_record = {}
 
 # pages : class Pages {pages, pages_id}
