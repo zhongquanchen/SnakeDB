@@ -74,7 +74,6 @@ class Query:
             if record.key == key:
                 ret_data = [record.key]
                 ret_data = ret_data + record.datas
-                print("found keys in update list select func ", ret_data)
         ret_record = Record_For_User(ret_data[0], ret_data[1], ret_data)
         list_data_a = [ret_record]
         return list_data_a
@@ -96,16 +95,12 @@ class Query:
         old_data = self.find_data_by_key(key)
 
         if not self.locked:
-            print("not in merge , counter is ", self.MERGE_COUNTER)
             new_data = self.combine_old_data(old_data, *columns)
             new_record = Record(new_data[0], new_data[1], new_data[2],
                                 new_data[3], new_data[4], new_data[5], new_data[6:])
-            print("not in merge , old_data is ", old_data)
-            print("not in merge , new record is ", new_data)
             self.table.modify(key, new_record, index)
             self.table.write(new_record, TYPE.TAIL)
         else:
-            print("yesy")
             new_data = self.combine_old_data(old_data, *columns)
             new_record = Record(new_data[0], new_data[1], new_data[2],
                                 new_data[3], new_data[4], new_data[5], new_data[6:])
@@ -131,7 +126,6 @@ class Query:
                 old_data = self.find_data_by_key(key)
                 record = Record(old_data[0], old_data[1], 0,
                                     old_data[3], old_data[4], old_data[2], old_data[6:])
-                index = self.table.tail_index_lookup[old_data[5]]
                 # self.table.modify_record(record.key, record)
 
             # merge and append the tail record to
@@ -219,8 +213,6 @@ class Query:
         if old_data[5] != 0:
             old_data = self.check_for_update(old_data[5])
         old_data = self.check_in_update_list(old_data)
-        # print("old_data is ", old_data)
-        # print("columns is ", columns)
         filtered_data = old_data
         if columns[0] is not None:
             filtered_data[0] = columns[0]
@@ -229,7 +221,6 @@ class Query:
             if columns[i + 1] is not None:
                 filtered_data[6 + i] = columns[i + 1]
         filtered_data[1] = self.update_counter  # (randint(0,int(old_data[1])) + self.update_counter) % 33000
-        # print("filererd data is ", filtered_data)
         return filtered_data
 
     def check_for_update(self, rid):
