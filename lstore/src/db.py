@@ -13,8 +13,12 @@ class Database():
         pass
 
     def open(self, path):
-        if not os.path.exists('ECS165/'):
-            os.makedirs('ECS165/')
+        try:
+            os.mkdir(path)
+        except OSError:
+            print("Creation of the directory %s failed" % path)
+        else:
+            print("Successfully created the directory %s " % path)
 
         self.maxBufferSize = BUFFER_SIZE
         #NEED TO inlcude Buffersize in Buffer initialization
@@ -34,9 +38,6 @@ class Database():
     def create_table(self, name, num_columns, key):
         table = Table(name, num_columns, key)
         cwd = os.getcwd()
-        path = 'ECS165/' + str(name)
-        if not os.path.exists(path):
-            os.makedirs(path)
         filename = cwd + '/ECS165/' + str(table.name) + '/' + str(table.name)
         with open(filename, 'wb') as f:
             pickle.dump(table, f)
