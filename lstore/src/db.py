@@ -23,7 +23,7 @@ class Database():
 
 
     def close(self):
-
+        pass
 
     """
     # Creates a new table
@@ -56,12 +56,5 @@ class Database():
     """
     def get_table(self, name):
         self.tables = self.disk.readTable(name)
-        cwd = os.getcwd()
-        path = 'ECS165/' + str(name)
-        if not os.path.exists(path):
-            os.makedirs(path)
-        filename = cwd + '/ECS165/' + str(table.name) + '/' + str(table.name)
-        with open(filename, 'wb') as f:
-            pickle.dump(table, f)
-        f.close()
-        return table
+        # cwd = os.getcwd()
+        # path = 'ECS165/' + str(name)
