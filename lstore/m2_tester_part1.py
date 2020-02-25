@@ -40,6 +40,8 @@ for _ in range(10):
             records[key][i] = value
             query.update(key, *updated_columns)
             record = query.select(key, 0, [1, 1, 1, 1, 1])[0]
+            # print("record in tester is ", record.key,"",record.columns)
+            # print("records in tester is ", records[key])
             error = False
             for j, column in enumerate(record.columns):
                 if column != records[key][j]:

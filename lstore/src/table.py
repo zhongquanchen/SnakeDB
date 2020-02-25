@@ -4,12 +4,11 @@ from lstore.src.buffer import *
 """
     :Record is used as a format to write into the page, [this is for admin use]
 """
-
-
 class Record:
     def __init__(self, key, rid, indirect, schema_encode, now, columns, datas):
         self.record = {}
         self.create_record(rid, key, columns, schema_encode, now, indirect, datas)
+        self.basekey = 0
 
     def create_record(self, rid, key, columns, schema_encode, now, indirect, datas):
         self.key = key
@@ -24,7 +23,6 @@ class Record:
     :Record is used as a format to write into the page, [this is for user] *block some data that shouldn't be seem
 """
 
-
 class Record_For_User:
     def __init__(self, key, rid, columns):
         self.rid = rid
@@ -36,11 +34,11 @@ class Record_For_User:
     :Table will used to store page directories, and all the ids, rid, columns, etc.
 """
 
-
 class Table:
 
     def __init__(self, name, num_columns, key):
-        self.base_page = BASE_PAGE_NUM
+        # current page index
+        self.current_page = 0
         self.tail_page = TAIL_PAGE_NUM
 
         self.name = name
@@ -51,13 +49,10 @@ class Table:
 
         self.tail_rid_lookup = {}
         self.tail_index_lookup = {}
-
         # use to match key with rid
         self.key_to_rid = {}
         # use to match the rid and the index, data location
         self.rid_to_index = {}
-        # current page index
-        self.current_page = 0
         # all the modify page will store in buffer
         self.buffer_manager = BufferManager(self.name)
         # tracks number of update operations for merge
@@ -71,6 +66,15 @@ class Table:
     :param name: modify_page. detect the action is to write in base page or in tail page
                               by default the action is writing in base page
     """
+
+    def write_page(self, record, pages, current_page):
+        record_array = self.record_to_array(record)
+        start_index = pages.pages[0].physical_addr
+        for i in range(len(pages.pages)):
+            pages.pages[i].write(record_array[i])
+        end_index = pages.pages[0].physical_addr
+        self.key_to_rid.update({record.key: record.rid})
+        self.rid_to_index.update({record.rid: Index(current_page, start_index, end_index)})
 
     def write(self, record, modify_page=TYPE.BASE):
         record_array = self.record_to_array(record)
@@ -156,6 +160,32 @@ class Table:
         pages.pages[5].modify(index, new_record.rid)
 
     """
+        format of array 
+        # self.key = key
+        # self.rid = rid
+        # self.columns = columns
+        # self.schema = schema_encode
+        # self.time = now
+        # self.indirect = indirect
+        # self.datas = datas
+    """
+    def modify_record(self, key, new_record):
+        rid = self.key_to_rid[key]
+        index = self.rid_to_index[rid]
+        pages_id = self.page_directory[index.page_number]
+        pages = self.buffer_manager.get_pages(pages_id)
+
+        pages.pages[0].modify(index, new_record.key)
+        pages.pages[3].modify(index, new_record.schema)
+        pages.pages[4].modify(index, new_record.time)
+        pages.pages[5].modify(index, 0)
+        i = 0
+        for page in pages.pages[6:]:
+            page.modify(index, new_record.datas[i])
+            i += 1
+
+
+    """
         This function will check for the row of data to see 
         if the indirection of that data is point to other location
         :param name: page_data. a row of data, [namely: record]
@@ -173,3 +203,13 @@ class Table:
             return tail_page_data
         else:
             return list_data
+
+    def create_new_pages(self):
+        pages = []
+        for i in range(self.num_columns+INTER_DATA_COL):
+            page = Page()
+            pages.append(page)
+
+        ret_pages = Pages()
+        ret_pages.pages = pages
+        return ret_pages

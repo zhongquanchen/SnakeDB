@@ -4,6 +4,7 @@ from lstore.src.config import *
 Implementation of Page for our SnakeSQL
 """
 
+
 class Pages:
     def __init__(self, cur_counter, pages):
         self.pid = RANDOM_ID + cur_counter
@@ -12,13 +13,14 @@ class Pages:
         self.dirty = False
         self.pin_num = 0
 
+
 class Page:
     """define page itself with a physical address, numbers of records"""
+
     def __init__(self):
         self.physical_addr = 0
         self.num_records = 0
         self.data = bytearray(4096)
-
 
     def read_data(self, start_index, end_index):
         ret_data = []
