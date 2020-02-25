@@ -124,7 +124,6 @@ class Query:
                 old_data = self.find_data_by_key(key)
                 record = Record(old_data[0], old_data[1], 0,
                                     old_data[3], old_data[4], old_data[2], old_data[6:])
-                self.table.modify_record(record.key, record)
 
             # merge and append the tail record to
             for record in self.update_list:
@@ -141,6 +140,15 @@ class Query:
         if self.MERGE_COUNTER <= 0:
             return True
         return False
+
+    def merge_update(self):
+        for record in self.update_list:
+            old_data = self.find_data_by_key(record.basekey)
+            index = self.table.rid_to_index[old_data[1]]
+            pages_id = self.table.page_directory[index.page_number]
+            if record.key == old_data[0]:
+                pages = self.table.buffer_manager.get_pages(pages_id)
+                pages.pages[5].modify(index, record.rid)
 
     """
         sum implementation
