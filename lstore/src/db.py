@@ -3,7 +3,6 @@ from lstore.src.disk import *
 from lstore.src.config import *
 from lstore.src.buffer import  *
 
-
 import os
 from os import path
 import pickle
@@ -23,7 +22,7 @@ class Database():
 
 
     def close(self):
-        pass
+        self.disk.writeTable(self.tables.name)
 
     """
     # Creates a new table
@@ -37,7 +36,7 @@ class Database():
         path = 'ECS165/' + str(name)
         if not os.path.exists(path):
             os.makedirs(path)
-        filename = cwd + '/ECS165/' + str(table.name) + '/' + str(table.name)
+        filename = cwd + '/ECS165/' + str(table.name)
         with open(filename, 'wb') as f:
             pickle.dump(table, f)
         f.close()
@@ -56,12 +55,12 @@ class Database():
     """
     def get_table(self, name):
         self.tables = self.disk.readTable(name)
-        cwd = os.getcwd()
-        path = 'ECS165/' + str(name)
-        if not os.path.exists(path):
-            os.makedirs(path)
-        filename = cwd + '/ECS165/' + str(table.name) + '/' + str(table.name)
-        with open(filename, 'wb') as f:
-            pickle.dump(table, f)
-        f.close()
-        return table
+        # cwd = os.getcwd()
+        # path = 'ECS165/' + str(name)
+        # if not os.path.exists(path):
+        #     os.makedirs(path)
+        # filename = cwd + '/ECS165/' + str(name)
+        # with open(filename, 'wb') as f:
+        #     pickle.dump(name, f)
+        # f.close()
+        return self.tables
