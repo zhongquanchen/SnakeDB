@@ -20,6 +20,7 @@ class Index:
     """
 
     def locate(self, value):
+
         pass
 
     """
