@@ -30,14 +30,21 @@ for key in keys:
     #     print('select on', key, ':', record)
 print("Select finished")
 
-db.close()
-grades_table = db.get_table('Grades')
+columns = 1
+value = 11
+index = Indexing(grades_table, query)
+ret_index = index.locate(column, value)
+for data in ret_index:
+    if data[column] != value:
+        print("indexing error : data is ", data)
+print("Indexing locate finished")
 
-index = Indexing(grades_table)
-ret_index = index.locate(1, 10)
-print(ret_index)
-# for j in range(len(ret_index[0])):
-#     for i in range(len(ret_index)):
-#         print(ret_index[i], end='')
-#     print()
-print("Indexing finished")
+begin = 10
+end = 15
+ret_index = index.locate_range(begin, end, column)
+for data in ret_index:
+    if not (end >= data[column] >= begin):
+        print("indexing error : data is ", data)
+print("Indexing locate_range finished")
+
+print("Indexing tester finished")

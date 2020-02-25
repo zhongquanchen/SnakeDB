@@ -6,10 +6,10 @@ A data strucutre holding indices for various columns of a table. Key column shou
 
 class Indexing:
 
-    def __init__(self, table):
+    def __init__(self, table, query):
         # One index for each table. All our empty initially.
         self.indices = [None] *  table.num_columns
-        self.query = Query(table)
+        self.query = query
 
     """
     # returns the location of all records with the given value on column "column"
@@ -21,18 +21,10 @@ class Indexing:
             data = self.query.find_data_by_key(key)
             user_data = [data[0]]
             user_data = user_data + data[6:]
-            if data[column] == value:
+            if user_data[column] == value:
                 ret_list.append(user_data)
 
-        temp_list = []
-        ret_indice = []
-        for i in range(len(self.indices)):
-            for j in range(len(ret_list)):
-                temp_list.append(ret_list[j][i])
-            ret_indice.append(temp_list)
-            temp_list = []
-
-        return ret_indice
+        return ret_list
 
     """
     # Returns the RIDs of all records with values in column "column" between "begin" and "end"
@@ -44,19 +36,11 @@ class Indexing:
             data = self.query.find_data_by_key(key)
             user_data = [data[0]]
             user_data = user_data + data[6:]
-            if end >= data[column] >= begin:
+            if end >= user_data[column] >= begin:
                 for i in range(len(self.indices)):
                     ret_list.append(user_data)
 
-        temp_list = []
-        ret_indice = []
-        for i in range(len(self.indices)):
-            for j in range(len(ret_list)):
-                temp_list.append(ret_list[j][i])
-            ret_indice.append(temp_list)
-            temp_list = []
-
-        return ret_indice
+        return ret_list
 
     """
     # optional: Create index on specific column
