@@ -35,10 +35,12 @@ class Database():
     def create_table(self, name, num_columns, key):
         table = Table(name, num_columns, key)
         cwd = os.getcwd()
+        path = 'ECS165/' + str(name)
+        if not os.path.exists(path):
+            os.makedirs(path)
         filename = cwd + '/ECS165/' + str(table.name) + '/' + str(table.name)
         with open(filename, 'wb') as f:
             pickle.dump(table, f)
-        self.tables.append(table)
         return table
 
     """
