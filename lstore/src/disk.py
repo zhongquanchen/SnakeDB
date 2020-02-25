@@ -43,17 +43,15 @@ class disk:
 
     def writeTable(self, table):
         cwd = os.getcwd()
-        filename = cwd + '/ECS165/' + str(table.name)
+        filename = cwd + '/ECS165/' + str(table.name) + '/' + str(table.name)
         with open(filename, 'wb') as f:
             pickle.dump(table, f)
         f.close()
 
     def readTable(self, tableName):
         cwd = os.getcwd()
-        filename = cwd + '/ECS165/' + str(tableName)
-        print(filename)
+        filename = cwd + '/ECS165/' + str(tableName) + '/' + str(tableName)
         table = pickle.load(open(filename, 'rb'))
-        f.close()
         return table
 
     def deleteTable(self, tableName):
