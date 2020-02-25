@@ -22,7 +22,9 @@ class Database():
 
 
     def close(self):
-        self.disk.writeTable(self.tables.name)
+        pass
+        # for table in self.tables:
+        #     self.disk.writeTable(table.name)
 
     """
     # Creates a new table
@@ -32,14 +34,6 @@ class Database():
     """
     def create_table(self, name, num_columns, key):
         table = Table(name, num_columns, key)
-        cwd = os.getcwd()
-        path = 'ECS165/' + str(name)
-        if not os.path.exists(path):
-            os.makedirs(path)
-        filename = cwd + '/ECS165/' + str(table.name)
-        with open(filename, 'wb') as f:
-            pickle.dump(table, f)
-        f.close()
         self.tables.append(table)
         return table
 
@@ -55,12 +49,4 @@ class Database():
     """
     def get_table(self, name):
         self.tables = self.disk.readTable(name)
-        # cwd = os.getcwd()
-        # path = 'ECS165/' + str(name)
-        # if not os.path.exists(path):
-        #     os.makedirs(path)
-        # filename = cwd + '/ECS165/' + str(name)
-        # with open(filename, 'wb') as f:
-        #     pickle.dump(name, f)
-        # f.close()
         return self.tables
