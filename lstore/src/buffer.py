@@ -10,7 +10,7 @@ class Buffer:
         self.bufferpool = {}
         self.buffersize = BUFFER_SIZE
         self.cur_size = 0
-        self.disk = disk(100)
+        self.disk = disk()
         self.replace = LRU()
 
     # Close function

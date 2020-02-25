@@ -51,6 +51,7 @@ class disk:
     def readTable(self, tableName):
         cwd = os.getcwd()
         filename = cwd + '/ECS165/' + str(tableName) + '/' + str(tableName)
+        print("file path ", filename)
         table = pickle.load(open(filename, 'rb'))
         return table
 
