@@ -67,15 +67,6 @@ class Table:
                               by default the action is writing in base page
     """
 
-    def write_page(self, record, pages, current_page):
-        record_array = self.record_to_array(record)
-        start_index = pages.pages[0].physical_addr
-        for i in range(len(pages.pages)):
-            pages.pages[i].write(record_array[i])
-        end_index = pages.pages[0].physical_addr
-        self.key_to_rid.update({record.key: record.rid})
-        self.rid_to_index.update({record.rid: Index(current_page, start_index, end_index)})
-
     def write(self, record, modify_page=TYPE.BASE):
         record_array = self.record_to_array(record)
         # update key in database & look_for_page will check for the pages directory and update if needed

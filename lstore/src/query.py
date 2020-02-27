@@ -1,5 +1,5 @@
 import operator
-import threading
+import concurrent.futures
 from lstore.src.table import *
 from lstore.src.buffer import *
 
@@ -10,7 +10,7 @@ class Query:
     """ Creates a Query object that can perform different queries on the specified table """
 
     def __init__(self, table):
-        self.MERGE_COUNTER = 1000
+        self.MERGE_COUNTER = MERGE_COUNTER
         self.table = table
         self.num_col = 0
         self.update_counter = 0
@@ -19,7 +19,8 @@ class Query:
         self.locked = False
         self.update_list = []
 
-
+        self.merged_page_num = []
+        self.merged_pages = []
     """ Delete the key in the dictionary, throw an exception when user want to update the deleted record """
 
     def delete(self, key):
@@ -82,12 +83,6 @@ class Query:
         if self.locked:
             self.merge_start()
 
-        if not self.merge_lock and self.locked:
-            self.thread.join()
-            self.locked = False
-            self.MERGE_COUNTER = 1000
-            self.update_list = []
-
         rid = self.table.key_to_rid[key]
         index = self.table.rid_to_index[rid]
         old_data = self.find_data_by_key(key)
@@ -114,32 +109,65 @@ class Query:
     """
     def merge_start(self):
         self.merge_lock = True
-        self.thread = threading.Thread(target=self.merge_process)
-        self.lock = threading.Lock()
-        self.thread.start()
+
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            results = {executor.submit(self.merge_process)}
+            for task in concurrent.futures.as_completed(results):
+                self.merge_data_update()
+                self.merge_update()
+                self.locked = False
+                self.MERGE_COUNTER = MERGE_COUNTER
+                self.update_list = []
 
     def merge_process(self):
-        with self.lock:
-            for key in self.table.key_to_rid:
-                old_data = self.find_data_by_key(key)
-                record = Record(old_data[0], old_data[1], 0,
-                                    old_data[3], old_data[4], old_data[2], old_data[6:])
+        new_data_array = []
+        for key in self.table.key_to_rid:
+            data = self.find_data_by_key(key)
+            origin_rid = data[1]  # origin rid
+            if 0 != data[5]:
+                data = self.check_for_update(data[5])
+            new_data = [data[0]] + [origin_rid] + data[2:5] + [0]  # origin key and origin rid
+            new_data = new_data + data[6:]  # origin key, rid with newest data
+            new_data_array.append(new_data)
 
-            # merge and append the tail record to
-            for record in self.update_list:
-                old_data = self.find_data_by_key(record.basekey)
-                index = self.table.rid_to_index[old_data[1]]
-                pages_id = self.table.page_directory[index.page_number]
-                if record.key == old_data[0]:
-                    pages = self.table.buffer_manager.get_pages(pages_id)
-                    pages.pages[5].modify(index, record.rid)
-            self.merge_lock = False
+        new_pages_array = []
+        pages_num_array = []
+        for page_num in self.table.page_directory:
+            if page_num < TAIL_PAGE_NUM:
+                pages = []
+                for i in range(self.table.num_columns + INTER_DATA_COL):
+                    page = Page()
+                    pages.append(page)
+                new_pages = Pages(page_num, pages)
+                new_pages_array.append(new_pages)
+                pages_num_array.append(page_num)
+
+        pages_counter = 0
+
+        for i in range(len(new_data_array)):
+            if new_pages_array[pages_counter].pages[0].has_capacity():
+                for j in range(len(new_pages_array[pages_counter].pages)):
+                    new_pages_array[pages_counter].pages[i].write(new_data_array[i][j])
+            else:
+                pages_counter += 1
+
+        self.merged_page_num = pages_num_array
+        self.merged_pages = new_pages_array
+        self.merge_lock = False
 
     def merge_count_down(self):
         self.MERGE_COUNTER -= 1
         if self.MERGE_COUNTER <= 0:
             return True
         return False
+
+    # self.key = key
+    # self.rid = rid
+    # self.columns = columns
+    # self.schema = schema_encode
+    # self.time = now
+    # self.indirect = indirect
+    # self.datas = datas
 
     def merge_update(self):
         for record in self.update_list:
@@ -149,6 +177,11 @@ class Query:
             if record.key == old_data[0]:
                 pages = self.table.buffer_manager.get_pages(pages_id)
                 pages.pages[5].modify(index, record.rid)
+
+    def merge_data_update(self):
+        for i in range(len(self.merged_page_num)):
+            pid = self.table.page_directory[self.merged_page_num[i]]
+            self.table.buffer_manager.update(pid, self.merged_pages[i])
 
     """
         sum implementation
@@ -166,17 +199,8 @@ class Query:
                 sum += data.columns[aggregate_column_index]
         return sum
 
-    def find_keys(self, start_range, end_range):
-        a = 0
-        b = 0
-        for key, value in self.table.col_to_key.items():
-            if value == start_range:
-                a = key
-            if value == end_range:
-                b = key
-        return [a, b]
-
     """
+        utilities implementation
     """
     def find_data_by_key(self, key):
         if key not in self.table.key_to_rid:
