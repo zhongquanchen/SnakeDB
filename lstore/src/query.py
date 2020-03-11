@@ -266,7 +266,15 @@ class Query:
                     new_data = [record.key, record.rid, record.indirect, record.schema, record.time, record.columns]
                     new_data = new_data + record.datas
             return new_data
-    
+        
+    """
+    incremenets one column of the record
+    this implementation should work if your select and update queries already work
+    :param key: the primary of key of the record to increment
+    :param column: the column to increment
+    # Returns True is increment is successful
+    # Returns False if no record matches key or if target record is locked by 2PL.
+    """
     def increment(self, key, column):
         r = self.select(key, self.table.key, [1] * self.table.num_columns)[0]
         if r is not False:
