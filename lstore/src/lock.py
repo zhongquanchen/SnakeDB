@@ -4,6 +4,7 @@
 """
 
 lockedkey = {}
+updatekey = {}
 
 class LockManager:
     def __init__(self):
@@ -14,6 +15,21 @@ class LockManager:
 
     def read_phase_release(lockedkey, key):
         lockedkey.update({key: False})
+
+    def write_phase_update(updatekey, key):
+        updatekey.update({key: True})
+
+    def write_phase_release(updatekey, key):
+        updatekey.update({key: False})
+
+    def check_update_valid(updatekey, key):
+        if key in updatekey:
+            # false means the key is not in locking status
+            if updatekey[key] is False :
+                return True
+            else:
+                return False
+        return True
 
     def check_validation(lockedkey, key):
         if key in lockedkey:

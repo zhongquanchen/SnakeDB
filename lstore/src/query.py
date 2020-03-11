@@ -22,6 +22,7 @@ class Query:
 
         self.merged_page_num = []
         self.merged_pages = []
+
     """ Delete the key in the dictionary, throw an exception when user want to update the deleted record """
 
     def delete(self, key):
@@ -50,6 +51,7 @@ class Query:
         # self.indirect = indirect
         # self.datas = datas
     """
+
     def insert(self, *columns):
         key = columns[0]
         cur_time = int(time.time())
@@ -65,10 +67,10 @@ class Query:
     """ Select a record with specified columns"""
 
     def select(self, key, column, query_columns):
-        # locking the keys
-        LockManager.read_phase_update(lockedkey, key)
-
         data = self.find_data_by_key(key)
+        if not LockManager.check_update_valid(updatekey, key):
+            return False
+        LockManager.read_phase_update(lockedkey, key)
         if 0 != data[5]:
             data = self.check_for_update(data[5])
         ret_data = [data[0]]
@@ -87,14 +89,6 @@ class Query:
     """ Update a record with specified key and columns """
 
     def update(self, key, *columns):
-        """ check for the validation first """
-        valid = LockManager.check_validation(lockedkey, key)
-        if valid is False:
-            return False
-
-        """ the program goes here means it is valid to update """
-        LockManager.read_phase_update(lockedkey, key)
-
         if self.locked:
             self.merge_start()
 
@@ -102,6 +96,12 @@ class Query:
         index = self.table.rid_to_index[rid]
         old_data = self.find_data_by_key(key)
 
+        """ check for the validation first """
+        if not LockManager.check_validation(lockedkey, key):
+            return False
+        """ the program goes here means it is valid to update """
+        LockManager.read_phase_update(lockedkey, key)
+        LockManager.write_phase_update(updatekey, key)
         if not self.locked:
             new_data = self.combine_old_data(old_data, *columns)
             new_record = Record(new_data[0], new_data[1], new_data[2],
@@ -109,6 +109,7 @@ class Query:
             self.table.modify(key, new_record, index)
             self.table.write(new_record, TYPE.TAIL)
         else:
+            print("i am in locked")
             new_data = self.combine_old_data(old_data, *columns)
             new_record = Record(new_data[0], new_data[1], new_data[2],
                                 new_data[3], new_data[4], new_data[5], new_data[6:])
@@ -117,15 +118,32 @@ class Query:
             self.table.write(new_record, TYPE.TAIL)
 
         self.locked = self.merge_count_down()
-
+        LockManager.write_phase_release(updatekey, key)
         LockManager.read_phase_release(lockedkey, key)
         return True
 
+    """
+    incremenets one column of the record
+    this implementation should work if your select and update queries already work
+    :param key: the primary of key of the record to increment
+    :param column: the column to increment
+    # Returns True is increment is successful
+    # Returns False if no record matches key or if target record is locked by 2PL.
+    """
 
+    def increment(self, key, column):
+        r = self.select(key, self.table.key, [1] * self.table.num_columns)[0]
+        if r is not False:
+            updated_columns = [None] * self.table.num_columns
+            updated_columns[column] = r.columns[column] + 1
+            u = self.update(key, *updated_columns)
+            return u
+        return False
 
     """
         merge implementation
     """
+
     def merge_start(self):
         self.merge_lock = True
 
@@ -205,6 +223,7 @@ class Query:
     """
         sum implementation
     """
+
     def sum(self, start_range, end_range, aggregate_column_index):
         # sort the key in dictionary
         # sum them up by two range
@@ -221,6 +240,7 @@ class Query:
     """
         utilities implementation
     """
+
     def find_data_by_key(self, key):
         if key not in self.table.key_to_rid:
             print("can't find key")
@@ -285,20 +305,3 @@ class Query:
                     new_data = [record.key, record.rid, record.indirect, record.schema, record.time, record.columns]
                     new_data = new_data + record.datas
             return new_data
-        
-    """
-    incremenets one column of the record
-    this implementation should work if your select and update queries already work
-    :param key: the primary of key of the record to increment
-    :param column: the column to increment
-    # Returns True is increment is successful
-    # Returns False if no record matches key or if target record is locked by 2PL.
-    """
-    def increment(self, key, column):
-        r = self.select(key, self.table.key, [1] * self.table.num_columns)[0]
-        if r is not False:
-            updated_columns = [None] * self.table.num_columns
-            updated_columns[column] = r[column] + 1
-            u = self.update(key, *updated_columns)
-            return u
-        return False

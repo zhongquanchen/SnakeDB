@@ -23,6 +23,9 @@ for i in range(0, 10000):
     q = Query(grades_table)
     q.insert(*records[key])
 
+record = q.select(92106429, 0, [1,1,1,1,1])[0]
+print("record is ", record)
+
 # create TransactionWorkers
 transaction_workers = []
 for i in range(num_threads):

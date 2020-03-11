@@ -1,9 +1,10 @@
-from template.db import Database
-from template.query import Query
-from template.transaction import Transaction
-from template.transaction_worker import TransactionWorker
+from lstore.src.db import Database
+from lstore.src.query import Query
+from lstore.src.transaction import Transaction
+from lstore.src.transaction_worker import TransactionWorker
 
 from random import choice, randint, sample, seed
+import threading
 
 db = Database()
 db.open('/home/pkhorsand/165a-winter-2020-private/db')
@@ -29,7 +30,7 @@ for i in range(num_threads):
     transaction_workers.append(TransactionWorker())
 
 for i in range(10000):
-    key = random.choice(keys)
+    key = choice(keys)
     record = records[key]
     c = record[1]
     transaction = Transaction()

@@ -50,6 +50,6 @@ class Transaction:
 
     def commit(self):
         # TODO: commit to database
-        Database.close = staticmethod(Database.close)
-        Database.close()
+        # Database.close = staticmethod(Database.close)
+        # Database.close()
         return True
