@@ -2,7 +2,7 @@
 # PageSize, StartRID, etc..
 import time
 import enum
-import lock_manager
+from lstore.src.lock import *
 
 # milestone 1
 INTER_DATA_COL = 5
@@ -22,6 +22,7 @@ TOTAL_RID = 100000000
 CURRENT_RID = 1
 NUM_UPDATES_MERGE = 10
 MERGE_COUNTER = 10000
+
 
 class TYPE(enum.Enum):
     BASE = 0
@@ -49,3 +50,7 @@ def translate_data(data):
     return ret_list
 
 
+"""
+    Global Interpreter Locks
+"""
+LockManger = LockManager()

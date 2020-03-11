@@ -1,55 +1,81 @@
-class Lock:
+
+"""
+    The lock will implement validation concurrency control
+"""
+
+lockedkey = {}
+
+class LockManager:
     def __init__(self):
-        self.lockedRID = []
-        self.locked = 0
-        self.dictLocks = dict()
+        pass
 
-    def acquireLock(self, rid):
-        if self.locked == 1:
-            return false
-        
-        if not rid in self.lockedRID:
-            self.lockedRID.append(rid)
-            dictLocks[str(rid)] = 1
-        else:
-            dictLocks[str(rid)] += 1
+    def read_phase_update(lockedkey, key):
+        lockedkey.update({key: True})
 
-        return true
+    def read_phase_release(lockedkey, key):
+        lockedkey.update({key: False})
 
-    def releaseLock(self, rid):
-        if self.locked == 1:
-            return false
-        
-        if not rid in self.lockedRID:
-            return true
-        else:
-            dictLocks[str(rid)] -= 1
-            if dictLocks[str(rid)] == 0:
-                self.lockedRID.remove(rid)
-        
-        return true
+    def check_validation(lockedkey, key):
+        if key in lockedkey:
+            # false means the key is not in locking status
+            if lockedkey[key] is False :
+                return True
+            else:
+                return False
+        return True
 
-    def checkLock(self, rid):
-        if not rid in self.lockedRID:
-            return false
-        else:
-            return true
-
-    def acquireLockManager(self):
-        if locked == 0:
-            locked = 1
-        else:
-            return true
-
-    def releaseLockManager(self):
-        if locked == 1:
-            locked = 0
-        else:
-            return true
-
-    def checkLockManager(self):
-        if locked == 1:
-            return true
-        else:
-            return false
-        
+# class Lock:
+#     def __init__(self):
+#         self.lockedkey = {}
+#         self.locked = 0
+#         self.dictLocks = dict()
+#
+#     def acquireLock(self, rid):
+#         if self.locked == 1:
+#             return False
+#
+#         if not rid in self.lockedRID:
+#             self.lockedRID.append(rid)
+#             self.dictLocks[str(rid)] = 1
+#         else:
+#             self.dictLocks[str(rid)] += 1
+#
+#         return True
+#
+#     def releaseLock(self, rid):
+#         if self.locked == 1:
+#             return False
+#
+#         if not rid in self.lockedRID:
+#             return True
+#         else:
+#             self.dictLocks[str(rid)] -= 1
+#             if self.dictLocks[str(rid)] == 0:
+#                 self.lockedRID.remove(rid)
+#
+#         return True
+#
+#     def checkLock(self, rid):
+#         if not rid in self.lockedRID:
+#             return False
+#         else:
+#             return True
+#
+#     def acquireLockManager(self):
+#         if self.locked == 0:
+#             locked = 1
+#         else:
+#             return True
+#
+#     def releaseLockManager(self):
+#         if self.locked == 1:
+#             locked = 0
+#         else:
+#             return True
+#
+#     def checkLockManager(self):
+#         if self.locked == 1:
+#             return True
+#         else:
+#             return False
+#

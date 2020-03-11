@@ -4,6 +4,8 @@ from lstore.src.buffer import *
 """
     :Record is used as a format to write into the page, [this is for admin use]
 """
+
+
 class Record:
     def __init__(self, key, rid, indirect, schema_encode, now, columns, datas):
         self.record = {}
@@ -19,9 +21,11 @@ class Record:
         self.indirect = indirect
         self.datas = datas
 
+
 """
     :Record is used as a format to write into the page, [this is for user] *block some data that shouldn't be seem
 """
+
 
 class Record_For_User:
     def __init__(self, key, rid, columns):
@@ -33,6 +37,7 @@ class Record_For_User:
 """
     :Table will used to store page directories, and all the ids, rid, columns, etc.
 """
+
 
 class Table:
 
@@ -160,6 +165,7 @@ class Table:
         # self.indirect = indirect
         # self.datas = datas
     """
+
     def modify_record(self, key, new_record):
         rid = self.key_to_rid[key]
         index = self.rid_to_index[rid]
@@ -174,7 +180,6 @@ class Table:
         for page in pages.pages[6:]:
             page.modify(index, new_record.datas[i])
             i += 1
-
 
     """
         This function will check for the row of data to see 
@@ -197,7 +202,7 @@ class Table:
 
     def create_new_pages(self):
         pages = []
-        for i in range(self.num_columns+INTER_DATA_COL):
+        for i in range(self.num_columns + INTER_DATA_COL):
             page = Page()
             pages.append(page)
 

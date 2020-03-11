@@ -2,6 +2,7 @@ import operator
 import concurrent.futures
 from lstore.src.table import *
 from lstore.src.buffer import *
+from lstore.src.lock import *
 
 from random import choice, randint, sample, seed
 
@@ -64,6 +65,9 @@ class Query:
     """ Select a record with specified columns"""
 
     def select(self, key, column, query_columns):
+        # locking the keys
+        LockManager.read_phase_update(lockedkey, key)
+
         data = self.find_data_by_key(key)
         if 0 != data[5]:
             data = self.check_for_update(data[5])
@@ -75,11 +79,22 @@ class Query:
                 ret_data = ret_data + record.datas
         ret_record = Record_For_User(ret_data[0], ret_data[1], ret_data)
         list_data_a = [ret_record]
+
+        # release the keys
+        LockManager.read_phase_release(lockedkey, key)
         return list_data_a
 
     """ Update a record with specified key and columns """
 
     def update(self, key, *columns):
+        """ check for the validation first """
+        valid = LockManager.check_validation(lockedkey, key)
+        if valid is False:
+            return False
+
+        """ the program goes here means it is valid to update """
+        LockManager.read_phase_update(lockedkey, key)
+
         if self.locked:
             self.merge_start()
 
@@ -102,6 +117,10 @@ class Query:
             self.table.write(new_record, TYPE.TAIL)
 
         self.locked = self.merge_count_down()
+
+        LockManager.read_phase_release(lockedkey, key)
+        return True
+
 
 
     """
