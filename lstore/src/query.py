@@ -266,3 +266,12 @@ class Query:
                     new_data = [record.key, record.rid, record.indirect, record.schema, record.time, record.columns]
                     new_data = new_data + record.datas
             return new_data
+    
+    def increment(self, key, column):
+        r = self.select(key, self.table.key, [1] * self.table.num_columns)[0]
+        if r is not False:
+            updated_columns = [None] * self.table.num_columns
+            updated_columns[column] = r[column] + 1
+            u = self.update(key, *updated_columns)
+            return u
+        return False
