@@ -2,6 +2,7 @@
 # PageSize, StartRID, etc..
 import time
 import enum
+import lock_manager
 
 # milestone 1
 INTER_DATA_COL = 5

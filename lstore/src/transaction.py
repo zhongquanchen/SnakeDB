@@ -1,6 +1,6 @@
-from template.table import Table, Record
-from template.index import Index
-
+from lstore.src.table import Table, Record
+from lstore.src.index import Index
+from lstore.src.table import *
 class Transaction:
 
     """
@@ -8,6 +8,8 @@ class Transaction:
     """
     def __init__(self):
         self.queries = []
+        self.db_transactions = []
+        self.db_state = {}
         pass
 
     """
@@ -31,6 +33,16 @@ class Transaction:
 
     def abort(self):
         #TODO: do roll-back and any other necessary operations
+        # Return false, and go back to where it was before the last begin in database, if there is a transaction
+        if self.db_transactions:
+            for name, value in self.db_transactions:
+                if value:
+                    self.db_state[name] = value
+                else:
+                    self.db_state.pop(name)
+            self.db_transactions.pop()
+        else:
+            print('There is no transaction')
         return False
 
     def commit(self):
