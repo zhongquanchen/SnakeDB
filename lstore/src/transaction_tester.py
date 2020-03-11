@@ -1,7 +1,7 @@
-from template.db import Database
-from template.query import Query
-from template.transaction import Transaction
-from template.transaction_worker import TransactionWorker
+from lstore.src.db import Database
+from lstore.src.query import Query
+from lstore.src.transaction import Transaction
+from lstore.src.transaction_worker import TransactionWorker
 
 import threading
 from random import choice, randint, sample, seed

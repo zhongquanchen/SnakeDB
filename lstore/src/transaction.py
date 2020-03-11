@@ -1,5 +1,5 @@
-from template.table import Table, Record
-from template.index import Index
+from lstore.src.table import Table, Record
+from lstore.src.index import Index
 
 class Transaction:
 
@@ -8,6 +8,7 @@ class Transaction:
     """
     def __init__(self):
         self.queries = []
+        self.increment
         pass
 
     """
@@ -35,5 +36,6 @@ class Transaction:
 
     def commit(self):
         # TODO: commit to database
+
         return True
 
