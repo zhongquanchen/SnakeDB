@@ -11,21 +11,41 @@ class LockManager:
         pass
 
     def read_phase_update(lockedkey, key):
-        lockedkey.update({key: True})
+        value = 1
+        if key in lockedkey:
+            value = lockedkey[key]
+            value += 1
+        lockedkey.update({key: value})
 
     def read_phase_release(lockedkey, key):
-        lockedkey.update({key: False})
+        value = 0
+        if key in lockedkey:
+            value = lockedkey[key]
+            value -= 1
+        else :
+            print("value is not assign with this key in lockedkeys: ", key)
+        lockedkey.update({key: value})
 
     def write_phase_update(updatekey, key):
-        updatekey.update({key: True})
+        value = 1
+        if key in updatekey:
+            value = updatekey[key]
+            value -= 1
+        updatekey.update({key: value})
 
     def write_phase_release(updatekey, key):
-        updatekey.update({key: False})
+        value = 0
+        if key in updatekey:
+            value = updatekey[key]
+            value -= 1
+        else :
+            print("value is not assign with this key in updatekeys: ", key)
+        updatekey.update({key: value})
 
     def check_update_valid(updatekey, key):
         if key in updatekey:
             # false means the key is not in locking status
-            if updatekey[key] is False :
+            if updatekey[key] == 0:
                 return True
             else:
                 return False
@@ -34,7 +54,7 @@ class LockManager:
     def check_validation(lockedkey, key):
         if key in lockedkey:
             # false means the key is not in locking status
-            if lockedkey[key] is False :
+            if lockedkey[key] == 0:
                 return True
             else:
                 return False
