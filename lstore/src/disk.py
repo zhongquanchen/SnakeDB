@@ -63,3 +63,15 @@ class disk:
         else:
             pass
         
+    def writeLog(self, log):
+        cwd = os.getcwd()
+        filename = cwd + '/ECS165/' + '/log'
+        with open(filename, 'wb') as f:
+            pickle.dump(log, f)
+        f.close()
+    
+    def readLog(self):
+        cwd = os.getcwd()
+        filename = cwd + '/ECS165/' + '/log'
+        log = pickle.load(open(filename, 'rb'))
+        return log
