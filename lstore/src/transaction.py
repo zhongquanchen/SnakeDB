@@ -11,8 +11,6 @@ class Transaction:
 
     def __init__(self):
         self.queries = []
-        self.db_transactions = []
-        self.db_state = {}
         pass
 
     """
@@ -38,7 +36,7 @@ class Transaction:
 
     def abort(self):
         # TODO: do roll-back and any other necessary operations
-        # Return false, and go back to where it was before the last begin in database, if there is a transaction
+        # Return false, and go back to where it was before the last begin in database
         keys = []
         for query, args in self.queries:
             keys.append(args[0])
