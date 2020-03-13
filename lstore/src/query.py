@@ -1,8 +1,11 @@
 import operator
 import concurrent.futures
+
+from lstore.src.redoLog import REDOLOG
 from lstore.src.table import *
 from lstore.src.buffer import *
 from lstore.src.lock import *
+from lstore.src.config import *
 
 from random import choice, randint, sample, seed
 
@@ -11,6 +14,7 @@ class Query:
     """ Creates a Query object that can perform different queries on the specified table """
 
     def __init__(self, table):
+        REDOLOG.table = table
         self.MERGE_COUNTER = MERGE_COUNTER
         self.table = table
         self.num_col = 0
@@ -68,9 +72,11 @@ class Query:
 
     def select(self, key, column, query_columns):
         data = self.find_data_by_key(key)
-        if not LockManager.check_update_valid(updatekey, key):
+
+        if not LockManager.check_validation(updatekey, key):
             return False
-        LockManager.read_phase_update(lockedkey, key)
+
+        LockManager.read_phase_update(lockedkey, key, Lock)
         if 0 != data[5]:
             data = self.check_for_update(data[5])
         ret_data = [data[0]]
@@ -83,7 +89,7 @@ class Query:
         list_data_a = [ret_record]
 
         # release the keys
-        LockManager.read_phase_release(lockedkey, key)
+        LockManager.read_phase_release(lockedkey, key, Lock)
         return list_data_a
 
     """ Update a record with specified key and columns """
@@ -100,14 +106,16 @@ class Query:
         if not LockManager.check_validation(lockedkey, key):
             return False
         """ the program goes here means it is valid to update """
-        LockManager.read_phase_update(lockedkey, key)
-        LockManager.write_phase_update(updatekey, key)
+        LockManager.read_phase_update(lockedkey, key, Lock)
+        LockManager.read_phase_update(updatekey, key, Lock)
+
         if not self.locked:
             new_data = self.combine_old_data(old_data, *columns)
             new_record = Record(new_data[0], new_data[1], new_data[2],
                                 new_data[3], new_data[4], new_data[5], new_data[6:])
             self.table.modify(key, new_record, index)
             self.table.write(new_record, TYPE.TAIL)
+            #REDOLOG.write_record(new_record)
         else:
             print("i am in locked")
             new_data = self.combine_old_data(old_data, *columns)
@@ -118,8 +126,8 @@ class Query:
             self.table.write(new_record, TYPE.TAIL)
 
         self.locked = self.merge_count_down()
-        LockManager.write_phase_release(updatekey, key)
-        LockManager.read_phase_release(lockedkey, key)
+        LockManager.read_phase_release(updatekey, key, Lock)
+        LockManager.read_phase_release(lockedkey, key, Lock)
         return True
 
     """

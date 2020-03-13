@@ -1,6 +1,8 @@
 from lstore.src.index import Index
 from lstore.src.table import *
 from lstore.src.db import *
+from lstore.src.redoLog import *
+
 
 class Transaction:
     """
@@ -37,19 +39,11 @@ class Transaction:
     def abort(self):
         # TODO: do roll-back and any other necessary operations
         # Return false, and go back to where it was before the last begin in database, if there is a transaction
-
+        keys = []
         for query, args in self.queries:
-            result = query(*args)
+            keys.append(args[0])
+        records = REDOLOG.roll_back_action(keys)
 
-        if self.db_transactions:
-            for name, value in self.db_transactions:
-                if value:
-                    self.db_state[name] = value
-                else:
-                    self.db_state.pop(name)
-            self.db_transactions.pop()
-        else:
-            print('There is no transaction')
         return False
 
     def commit(self):

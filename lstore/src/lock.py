@@ -5,113 +5,52 @@
 
 lockedkey = {}
 updatekey = {}
+Lock = False
 
 class LockManager:
     def __init__(self):
         pass
 
-    def read_phase_update(lockedkey, key):
-        value = 1
-        if key in lockedkey:
-            value = lockedkey[key]
-            value += 1
-        lockedkey.update({key: value})
+    def read_phase_update(lock, key, Lock):
+        if Lock:
+            return False
+        Lock = True
 
-    def read_phase_release(lockedkey, key):
+        value = 1
+        if key in lock:
+            value = lock[key]
+            value += 1
+        lock.update({key: value})
+        Lock = False
+        return True
+
+    def read_phase_release(lock, key, Lock):
+        if Lock:
+            return False
+        Lock = True
+
         value = 0
-        if key in lockedkey:
-            value = lockedkey[key]
+        if key in lock:
+            value = lock[key]
             value -= 1
         else :
             print("value is not assign with this key in lockedkeys: ", key)
-        lockedkey.update({key: value})
+        lock.update({key: value})
+        Lock = False
+        return True
 
-    def write_phase_update(updatekey, key):
-        value = 1
-        if key in updatekey:
-            value = updatekey[key]
-            value -= 1
-        updatekey.update({key: value})
-
-    def write_phase_release(updatekey, key):
-        value = 0
-        if key in updatekey:
-            value = updatekey[key]
-            value -= 1
-        else :
-            print("value is not assign with this key in updatekeys: ", key)
-        updatekey.update({key: value})
-
-    def check_update_valid(updatekey, key):
-        if key in updatekey:
+    def check_validation(lock, key):
+        if key in lock:
             # false means the key is not in locking status
-            if updatekey[key] == 0:
+            if lock[key] == 0:
                 return True
             else:
                 return False
         return True
 
-    def check_validation(lockedkey, key):
-        if key in lockedkey:
-            # false means the key is not in locking status
-            if lockedkey[key] == 0:
-                return True
-            else:
-                return False
-        return True
 
-# class Lock:
-#     def __init__(self):
-#         self.lockedkey = {}
-#         self.locked = 0
-#         self.dictLocks = dict()
-#
-#     def acquireLock(self, rid):
-#         if self.locked == 1:
-#             return False
-#
-#         if not rid in self.lockedRID:
-#             self.lockedRID.append(rid)
-#             self.dictLocks[str(rid)] = 1
-#         else:
-#             self.dictLocks[str(rid)] += 1
-#
-#         return True
-#
-#     def releaseLock(self, rid):
-#         if self.locked == 1:
-#             return False
-#
-#         if not rid in self.lockedRID:
-#             return True
-#         else:
-#             self.dictLocks[str(rid)] -= 1
-#             if self.dictLocks[str(rid)] == 0:
-#                 self.lockedRID.remove(rid)
-#
-#         return True
-#
-#     def checkLock(self, rid):
-#         if not rid in self.lockedRID:
-#             return False
-#         else:
-#             return True
-#
-#     def acquireLockManager(self):
-#         if self.locked == 0:
-#             locked = 1
-#         else:
-#             return True
-#
-#     def releaseLockManager(self):
-#         if self.locked == 1:
-#             locked = 0
-#         else:
-#             return True
-#
-#     def checkLockManager(self):
-#         if self.locked == 1:
-#             return True
-#         else:
-#             return False
-#
+"""
+    Global Interpreter Locks
+"""
+LockManger = LockManager()
+

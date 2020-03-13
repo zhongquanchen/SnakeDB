@@ -40,7 +40,6 @@ class Record_For_User:
 
 
 class Table:
-
     def __init__(self, name, num_columns, key):
         # current page index
         self.current_page = 0
@@ -148,7 +147,7 @@ class Table:
     :param name: index. (actually location in the bytearray) used to write into the page
     """
 
-    def modify(self, key, new_record, index):
+    def modify(self, key, new_record, index=0):
         rid = self.key_to_rid[key]
         index = self.rid_to_index[rid]
         pages_id = self.page_directory[index.page_number]

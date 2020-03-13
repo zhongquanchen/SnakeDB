@@ -3,6 +3,7 @@ from lstore.src.query import Query
 from lstore.src.transaction import Transaction
 from lstore.src.transaction_worker import TransactionWorker
 
+from time import process_time
 import threading
 from random import choice, randint, sample, seed
 
@@ -15,6 +16,7 @@ records = {}
 num_threads = 8
 seed(8739878934)
 
+t1 = process_time()
 # Generate random records
 for i in range(0, 10000):
     key = 92106429 + i
@@ -22,10 +24,11 @@ for i in range(0, 10000):
     records[key] = [key, 0, 0, 0, 0]
     q = Query(grades_table)
     q.insert(*records[key])
+t2 = process_time()
+print("finished insert, time is : ", t2-t1)
 
-record = q.select(92106429, 0, [1,1,1,1,1])[0]
-print("record is ", record)
 
+t1 = process_time()
 # create TransactionWorkers
 transaction_workers = []
 for i in range(num_threads):
@@ -58,7 +61,8 @@ for i, thread in enumerate(threads):
 
 num_committed_transactions = sum(t.result for t in transaction_workers)
 print(num_committed_transactions, 'transaction committed.')
-
+t2 = process_time()
+print("transaction finished, time is : ", t2 - t1)
 query = Query(grades_table)
 s = query.sum(keys[0], keys[-1], 1)
 
