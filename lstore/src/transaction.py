@@ -33,11 +33,9 @@ class Transaction:
         for query, args in self.queries:
             result = query(*args)
             # If the query has failed the transaction should abort
+            self.keys.append(args[0])
             if not result:
-                print("start aborting")
                 return self.abort()
-            else:
-                self.keys.append(args[0])
         return self.commit()
 
     def abort(self):
@@ -47,8 +45,7 @@ class Transaction:
         return False
 
     def commit(self):
-        self.keys.clear()
-        # TODO: commit to database
         with manager_lock:
-            REDOLOG.clearList()
+            REDOLOG.commit(self.keys)
+        self.keys.clear()
         return True

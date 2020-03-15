@@ -14,8 +14,6 @@ class Query:
     """ Creates a Query object that can perform different queries on the specified table """
 
     def __init__(self, table):
-        self.test = {}
-
         REDOLOG.setup_table(table)
         self.MERGE_COUNTER = MERGE_COUNTER
         self.table = table
@@ -69,6 +67,7 @@ class Query:
         self.num_col += 1
         schema_encoding = '0' * self.table.num_columns
         self.table.write(record)
+        REDOLOG.insert_base(record)
 
     """ Select a record with specified columns"""
 
@@ -110,14 +109,14 @@ class Query:
                 return False
             LockManager.read_phase_update(lockedkey, key)
 
-        with manager_lock:
             if not self.locked:
                 new_data = self.combine_old_data(old_data, *columns)
                 new_record = Record(new_data[0], new_data[1], new_data[2],
                                     new_data[3], new_data[4], new_data[5], new_data[6:])
                 self.table.modify(key, new_record, index)
                 self.table.write(new_record, TYPE.TAIL)
-                # print("r update values ", new_data)
+                REDOLOG.write_record(key, new_record)
+
             else:
                 new_data = self.combine_old_data(old_data, *columns)
                 new_record = Record(new_data[0], new_data[1], new_data[2],
@@ -126,7 +125,6 @@ class Query:
                 self.update_list.append(new_record)
                 self.table.write(new_record, TYPE.TAIL)
 
-        with manager_lock:
             LockManager.read_phase_release(lockedkey, key)
 
         self.locked = self.merge_count_down()
@@ -142,10 +140,6 @@ class Query:
     """
 
     def increment(self, key, column):
-        if key in self.test:
-            print("repeat key is ", column)
-        self.test.update({key : column})
-
         r = self.select(key, self.table.key, [1] * self.table.num_columns)
         if r is not False:
             r = r[0]
@@ -287,7 +281,7 @@ class Query:
         old_data = self.check_in_update_list(old_data)
         filtered_data = old_data
 
-        REDOLOG.write_record(filtered_data)
+        # REDOLOG.write_record(filtered_data)
 
         if columns[0] is not None:
             filtered_data[0] = columns[0]
