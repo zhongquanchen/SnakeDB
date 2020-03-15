@@ -14,7 +14,7 @@ class Query:
     """ Creates a Query object that can perform different queries on the specified table """
 
     def __init__(self, table):
-        REDOLOG.table = table
+        REDOLOG.setup_table(table)
         self.MERGE_COUNTER = MERGE_COUNTER
         self.table = table
         self.num_col = 0
@@ -71,12 +71,12 @@ class Query:
     """ Select a record with specified columns"""
 
     def select(self, key, column, query_columns):
+        with manager_lock:
+            if not LockManager.check_validation(lockedkey, key):
+                return False
+            LockManager.read_phase_update(lockedkey, key)
+
         data = self.find_data_by_key(key)
-
-        if not LockManager.check_validation(updatekey, key):
-            return False
-
-        LockManager.read_phase_update(lockedkey, key, Lock)
         if 0 != data[5]:
             data = self.check_for_update(data[5])
         ret_data = [data[0]]
@@ -88,8 +88,9 @@ class Query:
         ret_record = Record_For_User(ret_data[0], ret_data[1], ret_data)
         list_data_a = [ret_record]
 
-        # release the keys
-        LockManager.read_phase_release(lockedkey, key, Lock)
+        with manager_lock:
+            LockManager.read_phase_release(lockedkey, key)
+
         return list_data_a
 
     """ Update a record with specified key and columns """
@@ -102,32 +103,30 @@ class Query:
         index = self.table.rid_to_index[rid]
         old_data = self.find_data_by_key(key)
 
-        """ check for the validation first """
-        if not LockManager.check_validation(lockedkey, key):
-            return False
-        """ the program goes here means it is valid to update """
-        LockManager.read_phase_update(lockedkey, key, Lock)
-        LockManager.read_phase_update(updatekey, key, Lock)
+        with manager_lock:
+            if not LockManager.check_validation(lockedkey, key):
+                return False
+            LockManager.read_phase_update(lockedkey, key)
 
-        if not self.locked:
-            new_data = self.combine_old_data(old_data, *columns)
-            new_record = Record(new_data[0], new_data[1], new_data[2],
-                                new_data[3], new_data[4], new_data[5], new_data[6:])
-            self.table.modify(key, new_record, index)
-            self.table.write(new_record, TYPE.TAIL)
-            #REDOLOG.write_record(new_record)
-        else:
-            print("i am in locked")
-            new_data = self.combine_old_data(old_data, *columns)
-            new_record = Record(new_data[0], new_data[1], new_data[2],
-                                new_data[3], new_data[4], new_data[5], new_data[6:])
-            new_record.basekey = old_data[0]
-            self.update_list.append(new_record)
-            self.table.write(new_record, TYPE.TAIL)
+        with manager_lock:
+            if not self.locked:
+                new_data = self.combine_old_data(old_data, *columns)
+                new_record = Record(new_data[0], new_data[1], new_data[2],
+                                    new_data[3], new_data[4], new_data[5], new_data[6:])
+                self.table.modify(key, new_record, index)
+                self.table.write(new_record, TYPE.TAIL)
+            else:
+                new_data = self.combine_old_data(old_data, *columns)
+                new_record = Record(new_data[0], new_data[1], new_data[2],
+                                    new_data[3], new_data[4], new_data[5], new_data[6:])
+                new_record.basekey = old_data[0]
+                self.update_list.append(new_record)
+                self.table.write(new_record, TYPE.TAIL)
+
+        with manager_lock:
+            LockManager.read_phase_release(lockedkey, key)
 
         self.locked = self.merge_count_down()
-        LockManager.read_phase_release(updatekey, key, Lock)
-        LockManager.read_phase_release(lockedkey, key, Lock)
         return True
 
     """
@@ -256,7 +255,7 @@ class Query:
         rid = self.table.key_to_rid[key]
         page_dir = self.table.rid_to_index[rid]
         pages_id = self.table.page_directory[page_dir.page_number]
-        pages = self.table.buffer_manager.get_pages(pages_id)
+        pages = buffer_manager.get_pages(pages_id)
         data = []
         for i in range(len(pages.pages)):
             data.append(self.read_data(pages.pages[i], page_dir.start_index, page_dir.end_index))
@@ -281,6 +280,9 @@ class Query:
             old_data = self.check_for_update(old_data[5])
         old_data = self.check_in_update_list(old_data)
         filtered_data = old_data
+
+        REDOLOG.write_record(filtered_data)
+
         if columns[0] is not None:
             filtered_data[0] = columns[0]
 
@@ -296,7 +298,7 @@ class Query:
             exit()
         page_dir = self.table.tail_index_lookup[rid]
         pages_id = self.table.page_directory[page_dir.page_number]
-        pages = self.table.buffer_manager.get_pages(pages_id)
+        pages = buffer_manager.get_pages(pages_id)
         data = []
         for i in range(len(pages.pages)):
             data.append(self.read_data(pages.pages[i], page_dir.start_index, page_dir.end_index))

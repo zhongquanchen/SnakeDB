@@ -38,13 +38,14 @@ class Buffer:
         return False
 
     def bufferpool_capacity(self):
-        if self.cur_size+SPACE_LEFT > BUFFER_SIZE:
+        if self.cur_size + SPACE_LEFT > BUFFER_SIZE:
             return False
         return True
 
     """
         will detect if the buffer pool is full and write it into the buffer pool
     """
+
     def update(self, pages_id, pages, table_name):
         while not self.bufferpool_capacity():
             self.flush_page(len(pages.pages), table_name)
@@ -57,7 +58,7 @@ class Buffer:
             return self.bufferpool[pages_id]
         else:
             pages = self.disk.readPage(pages_id, table_name)
-            self.bufferpool.update({pages_id:pages})
+            self.bufferpool.update({pages_id: pages})
         self.replace.use_append(pages_id)
         if pages is not None:
             return pages
@@ -65,18 +66,22 @@ class Buffer:
     def size(self):
         return len(self.bufferpool)
 
+
 class BufferManager:
-    def __init__(self, table_name):
+    def __init__(self):
         self.buffer = Buffer()
         self.cur_counter = 0
+
+    def set_table_name(self, table_name):
         self.table_name = table_name
 
     def update(self, pages_id, pages):
-        self.buffer.update(pages_id,pages, self.table_name)
+        self.buffer.update(pages_id, pages, self.table_name)
 
     def get_pages(self, pages_id):
         pages = self.buffer.get_pages(pages_id, self.table_name)
         return pages
+
 
 class LRU:
     def __init__(self):
@@ -89,3 +94,6 @@ class LRU:
 
     def pop_top(self):
         return self.old.pop(0)
+
+
+buffer_manager = BufferManager()

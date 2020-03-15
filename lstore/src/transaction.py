@@ -1,4 +1,5 @@
 from lstore.src.index import Index
+from lstore.src.query import Query
 from lstore.src.table import *
 from lstore.src.db import *
 from lstore.src.redoLog import *
@@ -13,6 +14,7 @@ class Transaction:
         self.queries = []
         self.db_transactions = []
         self.db_state = {}
+        self.keys = []
         pass
 
     """
@@ -33,21 +35,21 @@ class Transaction:
             result = query(*args)
             # If the query has failed the transaction should abort
             if not result:
+                print("start aborting")
                 return self.abort()
+            else:
+                self.keys.append(args[0])
         return self.commit()
 
     def abort(self):
         # TODO: do roll-back and any other necessary operations
-        # Return false, and go back to where it was before the last begin in database, if there is a transaction
-        keys = []
-        for query, args in self.queries:
-            keys.append(args[0])
-        records = REDOLOG.roll_back_action(keys)
-
+        with manager_lock:
+            records = REDOLOG.roll_back_action(self.keys)
         return False
 
     def commit(self):
+        self.keys.clear()
         # TODO: commit to database
-        # Database.close = staticmethod(Database.close)
-        # Database.close()
+        with manager_lock:
+            REDOLOG.clearList()
         return True

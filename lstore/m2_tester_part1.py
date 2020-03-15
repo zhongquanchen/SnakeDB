@@ -2,6 +2,7 @@ from lstore.src.db import Database
 from lstore.src.query import Query
 
 from random import choice, randint, sample, seed
+from time import process_time
 
 db = Database()
 db.open('~/ECS165')
@@ -18,6 +19,7 @@ for i in range(0, 1000):
 keys = sorted(list(records.keys()))
 print("Insert finished")
 
+t1 = process_time()
 for key in keys:
     record = query.select(key, 0, [1, 1, 1, 1, 1])[0]
     error = False
@@ -28,8 +30,11 @@ for key in keys:
         print('select error on', key, ':', record, ', correct:', records[key])
     # else:
     #     print('select on', key, ':', record)
+t2 = process_time()
 print("Select finished")
+print("Select operation takes : ", t2 -t1)
 
+t1 = process_time()
 for _ in range(10):
     for key in keys:
         updated_columns = [None, None, None, None, None]
@@ -51,7 +56,9 @@ for _ in range(10):
             # else:
             #     print('update on', original, 'and', updated_columns, ':', record)
             updated_columns[i] = None
+t2 = process_time()
 print("Update finished")
+print("Update operation takes : ", t2 - t1)
 
 for i in range(0, 100):
     r = sorted(sample(range(0, len(keys)), 2))

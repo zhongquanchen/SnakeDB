@@ -1,34 +1,25 @@
-
+import threading
 """
     The lock will implement validation concurrency control
 """
 
 lockedkey = {}
 updatekey = {}
-Lock = False
+manager_lock = threading.Lock()
 
 class LockManager:
     def __init__(self):
         pass
 
-    def read_phase_update(lock, key, Lock):
-        if Lock:
-            return False
-        Lock = True
-
+    def read_phase_update(lock, key):
         value = 1
         if key in lock:
             value = lock[key]
             value += 1
         lock.update({key: value})
-        Lock = False
         return True
 
-    def read_phase_release(lock, key, Lock):
-        if Lock:
-            return False
-        Lock = True
-
+    def read_phase_release(lock, key):
         value = 0
         if key in lock:
             value = lock[key]

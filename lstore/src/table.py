@@ -58,7 +58,7 @@ class Table:
         # use to match the rid and the index, data location
         self.rid_to_index = {}
         # all the modify page will store in buffer
-        self.buffer_manager = BufferManager(self.name)
+        buffer_manager.set_table_name(self.name)
         # tracks number of update operations for merge
         self.count_updates = 0
 
@@ -113,7 +113,7 @@ class Table:
         if TYPE.BASE == modify_page:
             if len(self.page_directory) != 0:
                 pages_id = self.page_directory[self.current_page]
-                pages = self.buffer_manager.get_pages(pages_id)
+                pages = buffer_manager.get_pages(pages_id)
             if len(self.page_directory) == 0 or pages.pages[0].has_capacity() == False:
                 pages = []
                 for i in range(self.num_columns + INTER_DATA_COL):
@@ -122,14 +122,14 @@ class Table:
                 self.current_page += 1
                 ret_pages = Pages(self.current_page, pages)
                 pages_id = ret_pages.pid
-                self.buffer_manager.update(pages_id, ret_pages)
+                buffer_manager.update(pages_id, ret_pages)
                 self.page_directory.update({self.current_page: pages_id})
-            return self.buffer_manager.get_pages(pages_id)
+            return buffer_manager.get_pages(pages_id)
         else:
             # if the dictionary is empty just create one page
             if self.tail_page in self.page_directory:
                 pages_id = self.page_directory[self.tail_page]
-                pages = self.buffer_manager.get_pages(pages_id)
+                pages = buffer_manager.get_pages(pages_id)
             if self.tail_page not in self.page_directory or pages.pages[0].has_capacity() == False:
                 pages = []
                 for i in range(self.num_columns + INTER_DATA_COL):
@@ -138,9 +138,9 @@ class Table:
                 self.tail_page += 1
                 ret_pages = Pages(self.tail_page, pages)
                 pages_id = ret_pages.pid
-                self.buffer_manager.update(pages_id, ret_pages)
+                buffer_manager.update(pages_id, ret_pages)
                 self.page_directory.update({self.tail_page: pages_id})
-            return self.buffer_manager.get_pages(pages_id)
+            return buffer_manager.get_pages(pages_id)
 
     """
     :param name: record. contain the data for each rows
@@ -151,7 +151,7 @@ class Table:
         rid = self.key_to_rid[key]
         index = self.rid_to_index[rid]
         pages_id = self.page_directory[index.page_number]
-        pages = self.buffer_manager.get_pages(pages_id)
+        pages = buffer_manager.get_pages(pages_id)
         pages.pages[5].modify(index, new_record.rid)
 
     """
@@ -169,7 +169,7 @@ class Table:
         rid = self.key_to_rid[key]
         index = self.rid_to_index[rid]
         pages_id = self.page_directory[index.page_number]
-        pages = self.buffer_manager.get_pages(pages_id)
+        pages = buffer_manager.get_pages(pages_id)
 
         pages.pages[0].modify(index, new_record.key)
         pages.pages[3].modify(index, new_record.schema)
@@ -193,7 +193,7 @@ class Table:
             if list_data[2] not in self.tail_index_lookup:
                 print("can't find rid in tail page : def check_for_update()")
             tail_pages_id = self.page_directory[index.page_number]
-            tail_page = self.buffer_manager.get_pages(tail_pages_id)
+            tail_page = buffer_manager.get_pages(tail_pages_id)
             tail_page_data = translate_data(tail_page.data[index.start_index: index.end_index + DATA_SIZE])
             return tail_page_data
         else:
