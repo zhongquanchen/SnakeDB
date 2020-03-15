@@ -14,6 +14,8 @@ class Query:
     """ Creates a Query object that can perform different queries on the specified table """
 
     def __init__(self, table):
+        self.test = {}
+
         REDOLOG.setup_table(table)
         self.MERGE_COUNTER = MERGE_COUNTER
         self.table = table
@@ -115,6 +117,7 @@ class Query:
                                     new_data[3], new_data[4], new_data[5], new_data[6:])
                 self.table.modify(key, new_record, index)
                 self.table.write(new_record, TYPE.TAIL)
+                # print("r update values ", new_data)
             else:
                 new_data = self.combine_old_data(old_data, *columns)
                 new_record = Record(new_data[0], new_data[1], new_data[2],
@@ -139,6 +142,10 @@ class Query:
     """
 
     def increment(self, key, column):
+        if key in self.test:
+            print("repeat key is ", column)
+        self.test.update({key : column})
+
         r = self.select(key, self.table.key, [1] * self.table.num_columns)[0]
         if r is not False:
             updated_columns = [None] * self.table.num_columns
@@ -235,12 +242,10 @@ class Query:
         # sort the key in dictionary
         # sum them up by two range
         sum = 0
-        sorted_keys = sorted(
-            self.table.key_to_rid.items(), key=operator.itemgetter(0))
-        on_add = False
         for i in range(end_range - start_range + 1):
             if start_range + i in self.table.key_to_rid:
                 data = self.select(start_range + i, 0, [1, 1, 1, 1, 1])[0]
+                # print("sum selected columns ", data.columns)
                 sum += data.columns[aggregate_column_index]
         return sum
 
@@ -255,7 +260,7 @@ class Query:
         rid = self.table.key_to_rid[key]
         page_dir = self.table.rid_to_index[rid]
         pages_id = self.table.page_directory[page_dir.page_number]
-        pages = buffer_manager.get_pages(pages_id)
+        pages = self.table.buffer_manager.get_pages(pages_id)
         data = []
         for i in range(len(pages.pages)):
             data.append(self.read_data(pages.pages[i], page_dir.start_index, page_dir.end_index))
@@ -289,7 +294,7 @@ class Query:
         for i in range(len(columns) - 1):
             if columns[i + 1] is not None:
                 filtered_data[6 + i] = columns[i + 1]
-        filtered_data[1] = self.update_counter  # (randint(0,int(old_data[1])) + self.update_counter) % 33000
+        # filtered_data[1] =   # (randint(0,int(old_data[1])) + self.update_counter) % 33000
         return filtered_data
 
     def check_for_update(self, rid):
@@ -298,7 +303,7 @@ class Query:
             exit()
         page_dir = self.table.tail_index_lookup[rid]
         pages_id = self.table.page_directory[page_dir.page_number]
-        pages = buffer_manager.get_pages(pages_id)
+        pages = self.table.buffer_manager.get_pages(pages_id)
         data = []
         for i in range(len(pages.pages)):
             data.append(self.read_data(pages.pages[i], page_dir.start_index, page_dir.end_index))

@@ -68,9 +68,10 @@ class Buffer:
 
 
 class BufferManager:
-    def __init__(self):
+    def __init__(self, name):
         self.buffer = Buffer()
         self.cur_counter = 0
+        self.table_name = name
 
     def set_table_name(self, table_name):
         self.table_name = table_name
@@ -94,6 +95,3 @@ class LRU:
 
     def pop_top(self):
         return self.old.pop(0)
-
-
-buffer_manager = BufferManager()

@@ -48,22 +48,26 @@ for i in range(1000):
     transaction_workers[i % num_threads].add_transaction(transaction)
 
 threads = []
+# for transaction_worker in transaction_workers:
+#     threads.append(threading.Thread(target = transaction_worker.run, args = ()))
+#
+# for i, thread in enumerate(threads):
+#     print('Thread', i, 'started')
+#     thread.start()
+#
+# for i, thread in enumerate(threads):
+#     thread.join()
+#     print('Thread', i, 'finished')
+
 for transaction_worker in transaction_workers:
-    threads.append(threading.Thread(target = transaction_worker.run, args = ()))
-
-for i, thread in enumerate(threads):
-    print('Thread', i, 'started')
-    thread.start()
-
-for i, thread in enumerate(threads):
-    thread.join()
-    print('Thread', i, 'finished')
+    transaction_worker.run()
 
 num_committed_transactions = sum(t.result for t in transaction_workers)
 print(num_committed_transactions, 'transaction committed.')
 t2 = process_time()
 print("transaction finished, time is : ", t2 - t1)
 query = Query(grades_table)
+
 s = query.sum(keys[0], keys[-1], 1)
 
 if s != num_committed_transactions * 5:
