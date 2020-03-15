@@ -146,8 +146,9 @@ class Query:
             print("repeat key is ", column)
         self.test.update({key : column})
 
-        r = self.select(key, self.table.key, [1] * self.table.num_columns)[0]
+        r = self.select(key, self.table.key, [1] * self.table.num_columns)
         if r is not False:
+            r = r[0]
             updated_columns = [None] * self.table.num_columns
             updated_columns[column] = r.columns[column] + 1
             u = self.update(key, *updated_columns)
