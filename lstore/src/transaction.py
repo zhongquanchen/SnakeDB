@@ -15,7 +15,6 @@ class Transaction:
         self.db_transactions = []
         self.db_state = {}
         self.keys = []
-        pass
 
     """
     # Adds the given query to this transaction
