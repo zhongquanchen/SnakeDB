@@ -165,40 +165,6 @@ class Table:
         # self.datas = datas
     """
 
-    def modify_record(self, key, new_record):
-        rid = self.key_to_rid[key]
-        index = self.rid_to_index[rid]
-        pages_id = self.page_directory[index.page_number]
-        pages = buffer_manager.get_pages(pages_id)
-
-        pages.pages[0].modify(index, new_record.key)
-        pages.pages[3].modify(index, new_record.schema)
-        pages.pages[4].modify(index, new_record.time)
-        pages.pages[5].modify(index, 0)
-        i = 0
-        for page in pages.pages[6:]:
-            page.modify(index, new_record.datas[i])
-            i += 1
-
-    """
-        This function will check for the row of data to see 
-        if the indirection of that data is point to other location
-        :param name: page_data. a row of data, [namely: record]
-    """
-
-    def check_for_update(self, page_data):
-        list_data = translate_data(page_data)
-        if list_data[2] != 0:
-            index = self.tail_index_lookup[list_data[2]]
-            if list_data[2] not in self.tail_index_lookup:
-                print("can't find rid in tail page : def check_for_update()")
-            tail_pages_id = self.page_directory[index.page_number]
-            tail_page = buffer_manager.get_pages(tail_pages_id)
-            tail_page_data = translate_data(tail_page.data[index.start_index: index.end_index + DATA_SIZE])
-            return tail_page_data
-        else:
-            return list_data
-
     def create_new_pages(self):
         pages = []
         for i in range(self.num_columns + INTER_DATA_COL):

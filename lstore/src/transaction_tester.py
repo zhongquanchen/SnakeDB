@@ -48,19 +48,16 @@ for i in range(1000):
     transaction_workers[i % num_threads].add_transaction(transaction)
 
 threads = []
-# for transaction_worker in transaction_workers:
-#     threads.append(threading.Thread(target = transaction_worker.run, args = ()))
-#
-# for i, thread in enumerate(threads):
-#     print('Thread', i, 'started')
-#     thread.start()
-#
-# for i, thread in enumerate(threads):
-#     thread.join()
-#     print('Thread', i, 'finished')
-
 for transaction_worker in transaction_workers:
-    transaction_worker.run()
+    threads.append(threading.Thread(target = transaction_worker.run, args = ()))
+
+for i, thread in enumerate(threads):
+    print('Thread', i, 'started')
+    thread.start()
+
+for i, thread in enumerate(threads):
+    thread.join()
+    print('Thread', i, 'finished')
 
 num_committed_transactions = sum(t.result for t in transaction_workers)
 print(num_committed_transactions, 'transaction committed.')
