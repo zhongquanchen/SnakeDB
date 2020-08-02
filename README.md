@@ -1,6 +1,6 @@
 # 165a-winter-2020
 
-## Project : milestone 1
+## Project : milestone 1-3 all included
 ### Contributors : Zhongquan Chen, Zijian He, Andrew Theodorides, JianMing Bing, Zaige Wang
 
 ### Description
